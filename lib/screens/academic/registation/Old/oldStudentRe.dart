@@ -3,19 +3,18 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
-import 'package:registration_evaluation_app/screens/academic/payments/editPaymentPage.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/Old/chkstudentR.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/Old/editOldStudentRe.dart';
 import 'package:registration_evaluation_app/services/StudentService.dart';
 
-class Payment extends StatefulWidget {
-  const Payment({super.key});
+class OldStudentRe extends StatefulWidget {
+  const OldStudentRe({super.key});
 
   @override
-  State<Payment> createState() => _PaymentState();
+  State<OldStudentRe> createState() => _OldStudentReState();
 }
 
-class _PaymentState extends State<Payment> {
-  static const String baseUrl = "http://192.168.0.104:3000";
-
+class _OldStudentReState extends State<OldStudentRe> {
   List<dynamic> students = [];
 
   TextEditingController _searchController = TextEditingController();
@@ -23,18 +22,19 @@ class _PaymentState extends State<Payment> {
   List<dynamic> yearData = []; // use from dropdownbutton
   int? _valueYear; // use from dropdownbutton
 
+  //ສະຖານະການຮຽນ
+  List<dynamic> statuSData = []; // use from dropdownbutton
+  int? _valueStatuS; // use from dropdownbutton
+
   //ປີຮຽນ
   List<dynamic> studyyearData = []; // use from dropdownbutton
   int? _valueSyear; // use from dropdownbutton
 
-  //ເລືອກການຈ່າຍ
-  List<dynamic> payStatusData = [];
-  int? _valuePayS;
-
-  // bool _isLoadings = true; //ເພື່ອເຮັດໜ້າ spinner ໂລດ
+  //ລົງທະບຽນ ຫຼື ຫຍັງ??
+  List<dynamic> regisData = []; // use from dropdownbutton
+  int? _valueRegis; // use from dropdownbutton
 
   bool _isLoading = false;
-
   String? _errorMessage;
 
   @override
@@ -47,7 +47,7 @@ class _PaymentState extends State<Payment> {
   void fetchSearchStudents({String? searchQuery}) async {
     try {
       final fetchStudents = searchQuery == null || searchQuery.isEmpty
-          ? await Studentservice.getStudentsAll()
+          ? await Studentservice.getStudents()
           : await Studentservice.searchStudents(searchQuery);
       print(searchQuery);
       setState(() {
@@ -69,6 +69,8 @@ class _PaymentState extends State<Payment> {
     }
   }
 
+  static const String baseUrl = "http://192.168.0.104:3000";
+
   Future<void> _fetchAllDropdownData() async {
     setState(() {
       _isLoading = true;
@@ -78,9 +80,10 @@ class _PaymentState extends State<Payment> {
     try {
       // 1. สร้าง List ของ Future สำหรับแต่ละ API call
       List<Future<http.Response>> futures = [
-        http.get(Uri.parse("$baseUrl/payS")),
+        http.get(Uri.parse("$baseUrl/staS")),
         http.get(Uri.parse("$baseUrl/syear")),
         http.get(Uri.parse("$baseUrl/yearstd")),
+        http.get(Uri.parse("$baseUrl/regisSt")),
         // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
       ];
 
@@ -88,10 +91,11 @@ class _PaymentState extends State<Payment> {
       List<http.Response> responses = await Future.wait(futures);
 
       // 3. ตรวจสอบและประมวลผลข้อมูลจากแต่ละ API
-      //ການຈ່າຍ
+
+      //ສະຖານະການຮຽນ
       if (responses[0].statusCode == 200) {
-        payStatusData = jsonDecode(responses[0].body);
-        print('ການຈ່າຍ data loaded: ${payStatusData.length} items');
+        statuSData = jsonDecode(responses[0].body);
+        print('ປີຮຽນ data loaded: ${statuSData.length} items');
       } else {
         throw Exception(
             'Failed to load provinces data: ${responses[0].statusCode}');
@@ -115,6 +119,15 @@ class _PaymentState extends State<Payment> {
             'Failed to load provinces data: ${responses[2].statusCode}');
       }
 
+      //ລົງທະບຽນ ຫຼື ຫຍັງ??
+      if (responses[3].statusCode == 200) {
+        regisData = jsonDecode(responses[3].body);
+        print('ສົກຮຽນ data loaded: ${regisData.length} items');
+      } else {
+        throw Exception(
+            'Failed to load provinces data: ${responses[3].statusCode}');
+      }
+
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
       setState(() {
         _isLoading = false;
@@ -130,113 +143,23 @@ class _PaymentState extends State<Payment> {
 
   List<dynamic> get filteredStudents {
     return students.where((student) {
-      final matchesStatusS = student['statusID'] != 2;
-      _valueSyear == null || student['SyearID'] == _valueSyear;
+      // เพิ่มเงื่อนไข SyearID >= 2 เข้าไป
+      final matchesSyearIDGreaterThanOrEqualToTwo = student['SyearID'] >= 2;
       final matchesSyear =
           _valueSyear == null || student['SyearID'] == _valueSyear;
       final matchesYear =
           _valueYear == null || student['yearS_id'] == _valueYear;
-      final matchesPayS =
-          _valuePayS == null || student['paySt_ID'] == _valuePayS;
-      return matchesSyear && matchesYear && matchesPayS && matchesStatusS;
+      final matchesStatusS =
+          _valueStatuS == null || student['statusID'] == _valueStatuS;
+      final matchesRegis = student['regis_id'] == 2;
+
+      //ສົ່ງຄ່າກັບຄືນເພື່ອເຮັດການຕອງຂໍ້ມູນ
+      return matchesSyearIDGreaterThanOrEqualToTwo &&
+          matchesSyear &&
+          matchesYear &&
+          matchesStatusS &&
+          matchesRegis;
     }).toList();
-  }
-
-  void _showEditPaymentDialog(Map<String, dynamic> student) async {
-    int? selectedPayStID;
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'ແກ້ໄຂສະຖານະການຈ່າຍ',
-            style: TextStyle(fontFamily: 'Phetsarath'),
-          ),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black, width: 1), // Border
-                ),
-                child: DropdownButton<int>(
-                  padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  underline: SizedBox.shrink(),
-                  isExpanded: true,
-                  hint: Text(
-                    'ເລືອກສະຖານະໃໝ່',
-                    style: TextStyle(fontFamily: 'Phetsarath'),
-                  ),
-                  value: selectedPayStID,
-                  items: payStatusData.map<DropdownMenuItem<int>>((item) {
-                    return DropdownMenuItem<int>(
-                      value: item['paySt_ID'],
-                      child: Text(item['paySession'],
-                          style: TextStyle(fontFamily: 'Phetsarath')),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedPayStID = value;
-                    });
-                  },
-                ),
-              );
-            },
-          ),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  'ຍົກເລີກ',
-                  style: TextStyle(
-                    fontFamily: 'Phetsarath',
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: Size(
-                  80,
-                  50,
-                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              onPressed: () async {
-                if (selectedPayStID != null) {
-                  await Studentservice.updatePaymentStatus(
-                      student['stdID'].toString(), // 👈 แก้ตรงนี้
-                      selectedPayStID!);
-                  Navigator.of(context).pop(); // ปิด dialog หลังอัปเดต
-                  fetchStudents(); // รีเฟรชข้อมูลให้ทันที
-
-                  showAlert();
-                }
-              },
-              child: Text(
-                'ບັນທຶກ',
-                style: TextStyle(
-                  fontFamily: 'Phetsarath',
-                  color: Colors.white,
-                ),
-              ),
-            )
-          ],
-        );
-      },
-    );
   }
 
   void showAlert() {
@@ -264,7 +187,7 @@ class _PaymentState extends State<Payment> {
         ),
         backgroundColor: Colors.blueAccent,
         title: Text(
-          "ຊຳລະຄ່າຮຽນ",
+          "ລົງທະບຽນນັກສຶກສາເກົ່າ",
           style: TextStyle(
             fontFamily: 'Phetsarath',
             color: Colors.white,
@@ -283,7 +206,7 @@ class _PaymentState extends State<Payment> {
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (a, b, c) => Payment(), // โหลดหน้าใหม่ทับ
+                  pageBuilder: (a, b, c) => OldStudentRe(), // โหลดหน้าใหม่ทับ
                   transitionDuration: Duration.zero,
                 ),
               );
@@ -339,25 +262,25 @@ class _PaymentState extends State<Payment> {
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
-                        items: payStatusData.map((e) {
+                        items: studyyearData.map((e) {
                           return DropdownMenuItem(
                             child: Text(
-                              e["paySession"],
+                              e["Syear"],
                               style: TextStyle(
                                 fontFamily: 'Phetsarath',
                               ),
                             ),
-                            value: e["paySt_ID"],
+                            value: e["SyearID"],
                           );
                         }).toList(),
-                        value: _valuePayS,
+                        value: _valueSyear,
                         onChanged: (v) {
                           setState(() {
-                            _valuePayS = v as int;
+                            _valueSyear = v as int;
                           });
                         },
                         hint: Text(
-                          "ສະຖານະຈ່າຍ",
+                          "ປີຮຽນ",
                           style: TextStyle(
                             fontFamily: 'Phetsarath',
                           ),
@@ -379,25 +302,25 @@ class _PaymentState extends State<Payment> {
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
-                        items: studyyearData.map((e) {
+                        items: statuSData.map((e) {
                           return DropdownMenuItem(
                             child: Text(
-                              e["Syear"],
+                              e["status"],
                               style: TextStyle(
                                 fontFamily: 'Phetsarath',
                               ),
                             ),
-                            value: e["SyearID"],
+                            value: e["statusID"],
                           );
                         }).toList(),
-                        value: _valueSyear,
+                        value: _valueStatuS,
                         onChanged: (v) {
                           setState(() {
-                            _valueSyear = v as int;
+                            _valueStatuS = v as int;
                           });
                         },
                         hint: Text(
-                          "ປີຮຽນ",
+                          "ສະຖານະ",
                           style: TextStyle(
                             fontFamily: 'Phetsarath',
                           ),
@@ -448,6 +371,43 @@ class _PaymentState extends State<Payment> {
                 ],
               ),
               SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+                  ),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ChkStudentRe()));
+                    print("ບັນທຶກການຂໍ້ມູນນັກສຶກສາສຳເລັດ");
+                  },
+                  // onPressed: _submitDistrict,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.playlist_add_check_circle,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text(
+                        'ກວດສອບນັກສຶກສາທີ່ລົງທະບຽນແລ້ວ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontFamily: 'Phetsarath',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
                 height: 20,
               ),
               Expanded(
@@ -490,25 +450,30 @@ class _PaymentState extends State<Payment> {
                                     splashColor: Colors.blueAccent.withOpacity(
                                         0.3), // สีของ ripple effect
                                     // hoverColor: Colors.transparent,
-                                    highlightColor: Colors
-                                        .transparent, // ทำให้ไม่มีสีไฮไลต์เมื่อกดค้าง (ถ้าไม่ต้องการ)
+                                    highlightColor: Colors.transparent,
                                     onTap: () async {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content:
-                                              Text('ເຂົ້າສູ່ໜ້າການຊຳລະເງິນ'),
-                                          backgroundColor: Colors.green,
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
                                       bool? result = await Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => EditPaymentPage(
+                                          builder: (context) =>
+                                              EditOldStudentRe(
                                             stdID: student['stdID'],
                                             stdName: student['stdName'],
                                             stdSurname: student['stdSurname'],
+                                            dob: student['dob'],
+                                            currentOpt: student['gender'],
+                                            village: student['village'],
+                                            dsid: student['dsid'],
+                                            villageOfB: student['villageOfB'],
+                                            dsBid: student['dsBid'],
+                                            phoneNum: student['phoneNum'],
+                                            email: student['email'],
+                                            mid: student['mid'],
+                                            classID: student['classID'],
+                                            sem_id: student['sem_id'],
+                                            yearS_id: student['yearS_id'],
+                                            statusID: student['statusID'],
+                                            sYearID: student['SyearID'],
                                           ),
                                         ),
                                       );
@@ -572,8 +537,52 @@ class _PaymentState extends State<Payment> {
                                             Text(
                                               '${student['Syear']}',
                                               style: TextStyle(
-                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.048,
                                                 fontFamily: 'Phetsarath',
+                                                color: student['SyearID'] == 1
+                                                    ? Colors
+                                                        .green // ถ้า ID เป็น 1 ให้เป็นสีเขียว
+                                                    : student['SyearID'] == 2
+                                                        ? Colors
+                                                            .deepPurple // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
+                                                        : student['SyearID'] ==
+                                                                3
+                                                            ? Colors
+                                                                .orange // ถ้า ID เป็น 3 ให้เป็นสีแดง
+                                                            : Colors
+                                                                .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
+                                              ),
+                                            ),
+                                            Text(
+                                              '${student['status']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.048,
+                                                fontFamily: 'Phetsarath',
+                                              ),
+                                            ),
+                                            Text(
+                                              '${student['register']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.048,
+                                                fontFamily: 'Phetsarath',
+                                                color: student['regis_id'] == 1
+                                                    ? Colors.green
+                                                    : student['regis_id'] == 2
+                                                        ? Colors.red
+                                                        : Colors
+                                                            .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
                                               ),
                                             ),
                                             Text(
@@ -586,86 +595,104 @@ class _PaymentState extends State<Payment> {
                                                 fontFamily: 'Phetsarath',
                                               ),
                                             ),
-                                            Text(
-                                              '${student['paySession']}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.048,
-                                                fontFamily: 'Phetsarath',
-                                                color: student['paySt_ID'] == 1
-                                                    ? Colors
-                                                        .green // ถ้า ID เป็น 1 ให้เป็นสีเขียว
-                                                    : student['paySt_ID'] == 2
-                                                        ? Colors
-                                                            .orange // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
-                                                        : student['paySt_ID'] ==
-                                                                3
-                                                            ? Colors
-                                                                .red // ถ้า ID เป็น 3 ให้เป็นสีแดง
-                                                            : Colors
-                                                                .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
-                                              ),
-                                            ),
                                           ],
                                         ),
                                         Spacer(),
                                         PopupMenuButton(
                                           itemBuilder: (context) => [
                                             PopupMenuItem(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'ປຸ່ມຄຳສັ່ງ:',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily: 'Phetsarath',
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 5),
-                                                  ElevatedButton(
-                                                    onPressed: () async {
-                                                      _showEditPaymentDialog(
-                                                          student);
-                                                    },
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(Icons.edit,
-                                                            color: Color(
-                                                                0xFF345FB4)),
-                                                        Text(
-                                                          'ແກ້ໄຂ',
-                                                          style: TextStyle(
-                                                            color: Color(
-                                                                0xFF345FB4),
-                                                            fontFamily:
-                                                                'Phetsarath',
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor:
-                                                          Colors.white,
-                                                      minimumSize: Size(
-                                                        80,
-                                                        50,
-                                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                        horizontal: 16,
-                                                        vertical: 12,
+                                              child: Center(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'ປຸ່ມຄຳສັ່ງ:',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontFamily:
+                                                            'Phetsarath',
                                                       ),
                                                     ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                ],
+                                                    SizedBox(height: 5),
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        Navigator.of(context)
+                                                            .pop(true);
+                                                        bool? result =
+                                                            await Navigator
+                                                                .push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                EditOldStudentRe(
+                                                              stdID: student[
+                                                                  'stdID'],
+                                                              stdName: student[
+                                                                  'stdName'],
+                                                              stdSurname: student[
+                                                                  'stdSurname'],
+                                                              dob: student[
+                                                                  'dob'],
+                                                              currentOpt:
+                                                                  student[
+                                                                      'gender'],
+                                                              village: student[
+                                                                  'village'],
+                                                              dsid: student[
+                                                                  'dsid'],
+                                                              villageOfB: student[
+                                                                  'villageOfB'],
+                                                              dsBid: student[
+                                                                  'dsBid'],
+                                                              phoneNum: student[
+                                                                  'phoneNum'],
+                                                              email: student[
+                                                                  'email'],
+                                                              mid: student[
+                                                                  'mid'],
+                                                              classID: student[
+                                                                  'classID'],
+                                                              sem_id: student[
+                                                                  'sem_id'],
+                                                              yearS_id: student[
+                                                                  'yearS_id'],
+                                                              statusID: student[
+                                                                  'statusID'],
+                                                              sYearID: student[
+                                                                  'SyearID'],
+                                                            ),
+                                                          ),
+                                                        );
+                                                        if (result == true) {
+                                                          // If PageB signals a refresh
+                                                          setState(() {
+                                                            fetchStudents(); // Refresh PageA
+                                                          });
+                                                        }
+                                                      },
+                                                      child: Icon(
+                                                        Icons.edit,
+                                                        color: Colors.white,
+                                                      ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                        minimumSize: Size(
+                                                          80,
+                                                          50,
+                                                        ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                          horizontal: 16,
+                                                          vertical: 12,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ],

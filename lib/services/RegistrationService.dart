@@ -26,6 +26,7 @@ class Registrationservice {
     int yearS_id,
     int paySt_ID,
     int statusID,
+    int? regis_id,
   ) async {
     final response = await http.post(
       Uri.parse("$baseUrl/std/create"),
@@ -49,9 +50,51 @@ class Registrationservice {
         "yearS_id": yearS_id,
         "paySt_ID": paySt_ID,
         "statusID": statusID,
+        "regis_id": regis_id,
       }),
     );
     return response.statusCode == 201;
+  }
+
+  static Future<bool> reNewStudentsPay(
+    String stdID,
+    String stdName,
+    String stdSurname,
+    int? classID,
+  ) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/std/update/regis/$stdID"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "stdName": stdName,
+        "stdSurname": stdSurname,
+        "classID": classID,
+      }),
+    );
+    return response.statusCode == 200;
+  }
+
+  // Function Update std
+  static Future<bool> reOldStudents(
+    String stdID,
+    String stdName,
+    String stdSurname,
+    int? classID,
+    int? sem_id,
+    int? regis_id,
+  ) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/std/update/regis/$stdID"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "stdName": stdName,
+        "stdSurname": stdSurname,
+        "classID": classID,
+        "sem_id": sem_id,
+        "regis_id": regis_id,
+      }),
+    );
+    return response.statusCode == 200;
   }
 
   // Function Delete District

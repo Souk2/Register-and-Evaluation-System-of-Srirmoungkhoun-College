@@ -71,6 +71,9 @@ class _EditClassroomState extends State<EditClassroom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເເກ້ໄຂຊື່ສາຂາຮຽນ',
           style: TextStyle(

@@ -27,6 +27,7 @@ class _AddClassroomState extends State<AddClassroom> {
             ),
           );
           _tittlecontroller.clear();
+          Navigator.of(context).pop();
 
           showAlert();
         } else {
@@ -65,6 +66,9 @@ class _AddClassroomState extends State<AddClassroom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເພີ່ມຫ້ອງຮຽນ',
           style: TextStyle(

@@ -16,6 +16,9 @@ class _MajorState extends State<Major> {
   TextEditingController txtsearch = TextEditingController();
   TextEditingController _searchController = TextEditingController();
 
+  bool _isLoading = false;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,11 @@ class _MajorState extends State<Major> {
   }
 
   void fetchMajors() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
     try {
       final fetchedMajors = await Majorservice.getMajors();
       setState(() {
@@ -44,6 +52,10 @@ class _MajorState extends State<Major> {
     } catch (e) {
       print("Error: $e");
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void deleteMajors(int mid) async {
@@ -155,6 +167,9 @@ class _MajorState extends State<Major> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           "ສາຂາຮຽນ",
           style: TextStyle(
@@ -168,7 +183,7 @@ class _MajorState extends State<Major> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orangeAccent,
               shape: CircleBorder(),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(10),
             ),
             onPressed: () {
               // TODO: Refresh action
@@ -183,7 +198,7 @@ class _MajorState extends State<Major> {
             child: Icon(
               Icons.refresh,
               color: Colors.white,
-              size: 30,
+              size: 25,
             ),
           ),
         ],
@@ -226,7 +241,11 @@ class _MajorState extends State<Major> {
                       MaterialPageRoute(
                         builder: (context) => AddMajor(),
                       ),
-                    ),
+                    ).then((value) {
+                      setState(() {
+                        fetchMajors();
+                      });
+                    }),
                   }, // Opens the book entry dialog
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -252,126 +271,188 @@ class _MajorState extends State<Major> {
           ),
           SizedBox(height: 10),
           Expanded(
-            child: ListView.builder(
-              itemCount: majors.length,
-              itemBuilder: (context, index) {
-                final major = majors[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Row(
-                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: _isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Spacer(),
-                        Column(
-                          // crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${major['m_name']}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                fontFamily: 'Phetsarath',
-                              ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        PopupMenuButton(
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'ປຸ່ມຄຳສັ່ງ:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Phetsarath',
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      bool? result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => EditMajor(
-                                            mid: major['mid'],
-                                            m_name: major['m_name'],
-                                          ),
-                                        ),
-                                      );
-                                      if (result == true) {
-                                        fetchMajors();
-                                      }
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.edit,
-                                            color: Color(0xFF345FB4)),
-                                        Text(
-                                          'ແກ້ໄຂ',
-                                          style: TextStyle(
-                                            color: Color(0xFF345FB4),
-                                            fontFamily: 'Phetsarath',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      minimumSize: Size(
-                                        80,
-                                        50,
-                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                    onPressed: () => {
-                                      ConfirmDelete(major['mid']),
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.delete, color: Colors.white),
-                                        Text(
-                                          'ລົບ',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontFamily: 'Phetsarath',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.redAccent,
-                                      minimumSize: Size(
-                                        80,
-                                        50,
-                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        CircularProgressIndicator(), // loading icon
+                        SizedBox(height: 10),
+                        Text(
+                          'ໂລດຂໍ້ມູນ...',
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
+                  )
+                : majors.isEmpty
+                    ? Center(
+                        child: Text(
+                          "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: majors.length,
+                        itemBuilder: (context, index) {
+                          final major = majors[index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashColor: Colors.blueAccent
+                                    .withOpacity(0.3), // สีของ ripple effect
+                                // hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  bool? result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditMajor(
+                                        mid: major['mid'],
+                                        m_name: major['m_name'],
+                                      ),
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    setState(() {
+                                      fetchMajors();
+                                    });
+                                  }
+                                },
+                                child: Row(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Spacer(),
+                                    Column(
+                                      // crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '${major['m_name']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            fontFamily: 'Phetsarath',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    PopupMenuButton(
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'ປຸ່ມຄຳສັ່ງ:',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Phetsarath',
+                                                ),
+                                              ),
+                                              SizedBox(height: 5),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  Navigator.of(context).pop();
+                                                  bool? result =
+                                                      await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditMajor(
+                                                        mid: major['mid'],
+                                                        m_name: major['m_name'],
+                                                      ),
+                                                    ),
+                                                  );
+                                                  if (result == true) {
+                                                    setState(() {
+                                                      fetchMajors();
+                                                    });
+                                                  }
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.edit,
+                                                        color:
+                                                            Color(0xFF345FB4)),
+                                                    Text(
+                                                      'ແກ້ໄຂ',
+                                                      style: TextStyle(
+                                                        color:
+                                                            Color(0xFF345FB4),
+                                                        fontFamily:
+                                                            'Phetsarath',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  minimumSize: Size(
+                                                    80,
+                                                    50,
+                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              ElevatedButton(
+                                                onPressed: () => {
+                                                  Navigator.of(context).pop(),
+                                                  ConfirmDelete(major['mid']),
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete,
+                                                        color: Colors.white),
+                                                    Text(
+                                                      'ລົບ',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontFamily:
+                                                            'Phetsarath',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.redAccent,
+                                                  minimumSize: Size(
+                                                    80,
+                                                    50,
+                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

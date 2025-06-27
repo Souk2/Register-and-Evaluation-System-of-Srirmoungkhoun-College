@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:registration_evaluation_app/screens/LoginScreen%20.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/Management.dart';
 import 'package:registration_evaluation_app/screens/academic/payments/payment.dart';
-import 'package:registration_evaluation_app/screens/academic/registation/newStudent.dart';
-import 'package:registration_evaluation_app/screens/academic/registation/oldStud.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/New/newStudent.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/Old/oldStudentRe.dart';
 
 // สร้าง enum เพื่อใช้เป็นค่าใน Radio buttons
 enum StudentType { newStudent, oldStudent }
@@ -36,6 +36,7 @@ class _AcademicScreenState extends State<AcademicScreen> {
             "ກວດສອບນັກສຶກສາ",
             style: TextStyle(
               fontFamily: 'Phetsarath',
+              fontWeight: FontWeight.bold,
             ),
           ), // ตรวจสอบนักศึกษา
           content: Column(
@@ -80,7 +81,7 @@ class _AcademicScreenState extends State<AcademicScreen> {
                   Navigator.of(dialogContext).pop(); // ปิด dialog
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => OldStudent()),
+                    MaterialPageRoute(builder: (context) => OldStudentRe()),
                   );
                 },
               ),
@@ -95,11 +96,15 @@ class _AcademicScreenState extends State<AcademicScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ໜ້າຫຼັກ',
           style: TextStyle(
             color: Colors.white,
             fontFamily: "Phetsarath",
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.blueAccent,
@@ -134,11 +139,6 @@ class _AcademicScreenState extends State<AcademicScreen> {
                 ),
               ),
             ),
-            _buildDrawerItem(Icons.dashboard, 'ໜ້າຫຼັກ', () {
-              // Navigator.of(context).pop();
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => AcademicScreen()));
-            }),
             _buildDrawerItem(Icons.person_add, 'ຈັດການຂໍ້ມູນ', () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => Management()));
@@ -276,7 +276,7 @@ class _AcademicScreenState extends State<AcademicScreen> {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: MediaQuery.of(context).size.width * 0.045,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Phetsarath',
                 ),
@@ -286,7 +286,7 @@ class _AcademicScreenState extends State<AcademicScreen> {
               Text(
                 description,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: MediaQuery.of(context).size.width * 0.025,
                   color: Colors.black54,
                   fontFamily: 'Phetsarath',
                 ),

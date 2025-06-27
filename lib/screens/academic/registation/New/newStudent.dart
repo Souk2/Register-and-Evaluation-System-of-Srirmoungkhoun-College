@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
 import 'package:registration_evaluation_app/screens/academic/academicScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/payments/editPaymentPage.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/New/newStdPay.dart';
 import 'package:registration_evaluation_app/services/RegistrationService.dart';
 
 class NewStudent extends StatefulWidget {
@@ -22,6 +24,9 @@ class _NewStudentState extends State<NewStudent> {
   String currentOpt = opt[0];
   TextEditingController txtdob = TextEditingController();
   String age = "";
+
+  //ໃຊ້ເພື່່ອບອກສະຖານະການລົງທະບຽນວ່າຮຽນແລ້ວ
+  int regisID = 1;
 
   //ສົກຮຽນ
   List<dynamic> yearData = []; // use from dropdownbutton
@@ -52,10 +57,6 @@ class _NewStudentState extends State<NewStudent> {
   //ພາກຮຽນ
   List<dynamic> semData = [];
   int? _valueSem;
-
-  //ເລືອກການຈ່າຍ
-  List<dynamic> payStatusData = [];
-  int? _valuePayS;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -169,15 +170,6 @@ class _NewStudentState extends State<NewStudent> {
             'Failed to load districts data: ${responses[5].statusCode}');
       }
 
-      //ເລືອກການຈ່າຍ
-      if (responses[6].statusCode == 200) {
-        payStatusData = jsonDecode(responses[6].body);
-        print('Districts data loaded: ${payStatusData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[6].statusCode}');
-      }
-
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
       setState(() {
         _isLoading = false;
@@ -200,16 +192,16 @@ class _NewStudentState extends State<NewStudent> {
     }
   }
 
-  final _phoneController = TextEditingController();
-
   final TextEditingController _stdID = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _surname = TextEditingController();
   final TextEditingController _villageOB = TextEditingController();
   final TextEditingController _villageNow = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   int _statusID = 1;
   int _yearStudy = 1;
+  int _valuePayS = 3;
 
   String formatEmailForDatabase(String input) {
     // Trim spaces and ensure it's in lower case for consistency
@@ -241,12 +233,11 @@ class _NewStudentState extends State<NewStudent> {
           _valueMajor == null ||
           _valueClass == null ||
           _valueSem == null ||
-          _valueYear == null ||
-          _valuePayS == null) {
+          _valueYear == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
+              "ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ",
               style: TextStyle(
                 fontFamily: 'Phetsarath',
               ),
@@ -274,8 +265,9 @@ class _NewStudentState extends State<NewStudent> {
         _valueClass!,
         _valueSem!,
         _valueYear!,
-        _valuePayS!,
+        _valuePayS,
         _statusID,
+        regisID,
       );
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -289,10 +281,7 @@ class _NewStudentState extends State<NewStudent> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-
-        showAlert();
+        ShowPaymentPage();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -324,6 +313,92 @@ class _NewStudentState extends State<NewStudent> {
       ),
       confirmBtnColor: Colors.green,
       confirmBtnText: "ຕົກລົງ",
+    );
+  }
+
+  void ShowPaymentPage() async {
+    print("Confirm");
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(
+            'ເຂົ້າສູ່ໜ້າຊຳລະເງິນ',
+            style: TextStyle(
+              fontFamily: 'Phetsarath',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'ທ່ານຈະເຂົ້າສູ່ໜ້າຊຳລະເງິນບໍ່?',
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: 'Phetsarath',
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.orange,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+
+                Navigator.of(dialogContext).pop();
+                showAlert();
+              },
+              child: Text(
+                'ຍົກເລີກ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.green,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => NewStdPay(
+                            stdID: _stdID.text,
+                            stdName: _name.text,
+                            stdSurname: _surname.text)));
+              },
+              child: Text(
+                'ຕົກລົງ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -394,8 +469,7 @@ class _NewStudentState extends State<NewStudent> {
                     _valueMajor == null ||
                     _valueClass == null ||
                     _valueSem == null ||
-                    _valueYear == null ||
-                    _valuePayS == null) {
+                    _valueYear == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -476,7 +550,10 @@ class _NewStudentState extends State<NewStudent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blueAccent,
         title: Text(
           "ລົງທະບຽນນັກສຶກສາໃໝ່",
           style: TextStyle(
@@ -551,6 +628,9 @@ class _NewStudentState extends State<NewStudent> {
                 ),
                 TextFormField(
                   controller: _stdID,
+                  style: TextStyle(
+                    fontFamily: 'Phetsarath',
+                  ),
                   decoration: InputDecoration(
                     labelText: 'ລະຫັດນັກສືກສາ',
                     labelStyle: TextStyle(
@@ -560,6 +640,12 @@ class _NewStudentState extends State<NewStudent> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(
                   height: 10,
@@ -569,6 +655,9 @@ class _NewStudentState extends State<NewStudent> {
                     Expanded(
                       child: TextFormField(
                         controller: _name,
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
                         decoration: InputDecoration(
                           labelText: 'ຊື່',
                           labelStyle: TextStyle(
@@ -578,6 +667,12 @@ class _NewStudentState extends State<NewStudent> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(
@@ -586,6 +681,9 @@ class _NewStudentState extends State<NewStudent> {
                     Expanded(
                       child: TextFormField(
                         controller: _surname,
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
                         decoration: InputDecoration(
                           labelText: 'ນາມສະກຸນ',
                           labelStyle: TextStyle(
@@ -595,6 +693,12 @@ class _NewStudentState extends State<NewStudent> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -821,6 +925,9 @@ class _NewStudentState extends State<NewStudent> {
                       child: Container(
                         child: TextFormField(
                           controller: _villageOB,
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
                           decoration: InputDecoration(
                             labelText: 'ບ້ານເກີດ',
                             labelStyle: TextStyle(
@@ -830,6 +937,12 @@ class _NewStudentState extends State<NewStudent> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -940,6 +1053,9 @@ class _NewStudentState extends State<NewStudent> {
                       child: Container(
                         child: TextFormField(
                           controller: _villageNow,
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
                           decoration: InputDecoration(
                             labelText: 'ບ້ານຢູ່ປັດຈຸບັນ',
                             labelStyle: TextStyle(
@@ -949,6 +1065,12 @@ class _NewStudentState extends State<NewStudent> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -966,6 +1088,9 @@ class _NewStudentState extends State<NewStudent> {
                     Expanded(
                       child: TextFormField(
                         controller: _emailController,
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'ອີເມວ',
@@ -986,6 +1111,12 @@ class _NewStudentState extends State<NewStudent> {
                                 offset: formattedEmail.length),
                           );
                         },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(
@@ -994,6 +1125,9 @@ class _NewStudentState extends State<NewStudent> {
                     Expanded(
                       child: TextFormField(
                         controller: _phoneController,
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
                         keyboardType: TextInputType.number,
                         maxLength: 13,
                         inputFormatters: [
@@ -1010,6 +1144,12 @@ class _NewStudentState extends State<NewStudent> {
                           ),
                           counterText: "",
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -1148,136 +1288,6 @@ class _NewStudentState extends State<NewStudent> {
                           },
                           hint: Text(
                             "ເລືອກພາກຮຽນ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "ລາຍລະອຽດການຈ່າຍເງິນ",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    fontFamily: 'Phetsarath',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton<String>(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          underline: const SizedBox.shrink(),
-                          isExpanded: true,
-                          value:
-                              _selectedTerm, // กำหนดค่าปัจจุบันของ DropdownButton
-                          hint: const Text(
-                            "ເລືອກຄ່າເທີມ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                          items: _termAmounts.keys.map((String key) {
-                            return DropdownMenuItem<String>(
-                              value: key,
-                              child: Text(
-                                key,
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ), // แสดงชื่อตัวเลือก
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedTerm = newValue; // อัปเดตค่าที่เลือก
-                              if (_selectedTerm != null) {
-                                // ดึงจำนวนเงินจาก Map และแสดงใน TextFormField
-                                _amountController.text =
-                                    _termAmounts[_selectedTerm] ?? '';
-                              } else {
-                                _amountController.text =
-                                    ""; // เคลียร์ค่าถ้าไม่มีการเลือก
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Container(
-                        child: TextFormField(
-                          controller:
-                              _amountController, // ใช้ controller เพื่อจัดการค่าของ TextFormField
-                          // enabled: false,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            labelText: 'ເປັນຈຳນວນເງິນ',
-                            labelStyle: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          underline: SizedBox.shrink(),
-                          isExpanded: true,
-                          items: payStatusData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["paySession"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["paySt_ID"],
-                            );
-                          }).toList(),
-                          value: _valuePayS,
-                          onChanged: (v) {
-                            setState(() {
-                              _valuePayS = v as int;
-                            });
-                          },
-                          hint: Text(
-                            "ເລືອກການຈ່າຍ",
                             style: TextStyle(
                               fontFamily: 'Phetsarath',
                             ),

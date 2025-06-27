@@ -158,6 +158,9 @@ class _StudentPageState extends State<StudentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         backgroundColor: Colors.blueAccent,
         title: Text(
           "ຈັດການຂໍ້ມູນນັກສຶກສາ",
@@ -172,7 +175,7 @@ class _StudentPageState extends State<StudentPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orangeAccent,
               shape: CircleBorder(),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(10),
             ),
             onPressed: () {
               // TODO: Refresh action
@@ -187,7 +190,7 @@ class _StudentPageState extends State<StudentPage> {
             child: Icon(
               Icons.refresh,
               color: Colors.white,
-              size: 30,
+              size: 25,
             ),
           ),
         ],
@@ -347,184 +350,279 @@ class _StudentPageState extends State<StudentPage> {
                 height: 20,
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: filteredStudents.length,
-                  itemBuilder: (context, index) {
-                    final student = filteredStudents[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: _isLoading
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Spacer(),
-                            Column(
-                              // crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '${student['stdID']}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.blueAccent,
-                                    fontFamily: 'Phetsarath',
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      '${student['stdName']}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        fontFamily: 'Phetsarath',
-                                      ),
-                                    ),
-                                    Text(
-                                      ' ${student['stdSurname']}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        fontFamily: 'Phetsarath',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  '${student['Syear']}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    fontFamily: 'Phetsarath',
-                                    color: student['SyearID'] == 1
-                                        ? Colors
-                                            .green // ถ้า ID เป็น 1 ให้เป็นสีเขียว
-                                        : student['SyearID'] == 2
-                                            ? Colors
-                                                .deepPurple // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
-                                            : student['SyearID'] == 3
-                                                ? Colors
-                                                    .orange // ถ้า ID เป็น 3 ให้เป็นสีแดง
-                                                : Colors
-                                                    .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
-                                  ),
-                                ),
-                                Text(
-                                  '${student['status']}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    fontFamily: 'Phetsarath',
-                                    color: student['statusID'] == 1
-                                        ? Colors.orange
-                                        : student['statusID'] == 2
-                                            ? Colors.green
-                                            : student['statusID'] == 3
-                                                ? Colors.brown
-                                                : student['statusID'] == 4
-                                                    ? Colors.red
-                                                    : Colors
-                                                        .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
-                                  ),
-                                ),
-                                Text(
-                                  'ສົກຮຽນ ${student['yearOf']}',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: 'Phetsarath',
-                                  ),
-                                ),
-                              ],
+                            CircularProgressIndicator(), // loading icon
+                            SizedBox(height: 10),
+                            Text(
+                              'ໂລດຂໍ້ມູນ...',
+                              style: TextStyle(
+                                fontFamily: 'Phetsarath',
+                              ),
                             ),
-                            Spacer(),
-                            PopupMenuButton(
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'ປຸ່ມຄຳສັ່ງ:',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Phetsarath',
+                          ],
+                        ),
+                      )
+                    : filteredStudents.isEmpty
+                        ? Center(
+                            child: Text(
+                              "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                              style: TextStyle(
+                                fontFamily: 'Phetsarath',
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredStudents.length,
+                            itemBuilder: (context, index) {
+                              final student = filteredStudents[index];
+                              return Card(
+                                margin: EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 16),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(10),
+                                    splashColor: Colors.blueAccent.withOpacity(
+                                        0.3), // สีของ ripple effect
+                                    // hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      bool? result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditStudentPage(
+                                            stdID: student['stdID'],
+                                            stdName: student['stdName'],
+                                            stdSurname: student['stdSurname'],
+                                            dob: student['dob'],
+                                            currentOpt: student['gender'],
+                                            village: student['village'],
+                                            dsid: student['dsid'],
+                                            villageOfB: student['villageOfB'],
+                                            dsBid: student['dsBid'],
+                                            phoneNum: student['phoneNum'],
+                                            email: student['email'],
+                                            mid: student['mid'],
+                                            classID: student['classID'],
+                                            sem_id: student['sem_id'],
+                                            yearS_id: student['yearS_id'],
+                                            statusID: student['statusID'],
+                                            sYearID: student['SyearID'],
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          bool? result = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  EditStudentPage(
-                                                stdID: student['stdID'],
-                                                stdName: student['stdName'],
-                                                stdSurname:
-                                                    student['stdSurname'],
-                                                dob: student['dob'],
-                                                currentOpt: student['gender'],
-                                                village: student['village'],
-                                                dsid: student['dsid'],
-                                                villageOfB:
-                                                    student['villageOfB'],
-                                                dsBid: student['dsBid'],
-                                                phoneNum: student['phoneNum'],
-                                                email: student['email'],
-                                                mid: student['mid'],
-                                                classID: student['classID'],
-                                                sem_id: student['sem_id'],
-                                                yearS_id: student['yearS_id'],
-                                                statusID: student['statusID'],
+                                      );
+                                      if (result == true) {
+                                        // If PageB signals a refresh
+                                        setState(() {
+                                          fetchStudents(); // Refresh PageA
+                                        });
+                                      }
+                                    },
+                                    child: Row(
+                                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Spacer(),
+                                        Column(
+                                          // crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '${student['stdID']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Colors.blueAccent,
+                                                fontFamily: 'Phetsarath',
                                               ),
                                             ),
-                                          );
-                                          if (result == true) {
-                                            fetchStudents();
-                                          }
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit,
-                                                color: Color(0xFF345FB4)),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${student['stdName']}',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    fontFamily: 'Phetsarath',
+                                                  ),
+                                                ),
+                                                Text(
+                                                  ' ${student['stdSurname']}',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    fontFamily: 'Phetsarath',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                             Text(
-                                              'ແກ້ໄຂ',
+                                              '${student['Syear']}',
                                               style: TextStyle(
-                                                color: Color(0xFF345FB4),
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                fontFamily: 'Phetsarath',
+                                                color: student['SyearID'] == 1
+                                                    ? Colors
+                                                        .green // ถ้า ID เป็น 1 ให้เป็นสีเขียว
+                                                    : student['SyearID'] == 2
+                                                        ? Colors
+                                                            .deepPurple // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
+                                                        : student['SyearID'] ==
+                                                                3
+                                                            ? Colors
+                                                                .orange // ถ้า ID เป็น 3 ให้เป็นสีแดง
+                                                            : Colors
+                                                                .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
+                                              ),
+                                            ),
+                                            Text(
+                                              '${student['status']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                fontFamily: 'Phetsarath',
+                                                color: student['statusID'] == 1
+                                                    ? Colors.orange
+                                                    : student['statusID'] == 2
+                                                        ? Colors.green
+                                                        : student['statusID'] ==
+                                                                3
+                                                            ? Colors.brown
+                                                            : student['statusID'] ==
+                                                                    4
+                                                                ? Colors.red
+                                                                : Colors
+                                                                    .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
+                                              ),
+                                            ),
+                                            Text(
+                                              'ສົກຮຽນ ${student['yearOf']}',
+                                              style: TextStyle(
+                                                fontSize: 20,
                                                 fontFamily: 'Phetsarath',
                                               ),
                                             ),
                                           ],
                                         ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                            80,
-                                            50,
-                                          ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
-                                          ),
+                                        Spacer(),
+                                        PopupMenuButton(
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'ປຸ່ມຄຳສັ່ງ:',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontFamily: 'Phetsarath',
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      bool? result =
+                                                          await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              EditStudentPage(
+                                                            stdID: student[
+                                                                'stdID'],
+                                                            stdName: student[
+                                                                'stdName'],
+                                                            stdSurname: student[
+                                                                'stdSurname'],
+                                                            dob: student['dob'],
+                                                            currentOpt: student[
+                                                                'gender'],
+                                                            village: student[
+                                                                'village'],
+                                                            dsid:
+                                                                student['dsid'],
+                                                            villageOfB: student[
+                                                                'villageOfB'],
+                                                            dsBid: student[
+                                                                'dsBid'],
+                                                            phoneNum: student[
+                                                                'phoneNum'],
+                                                            email: student[
+                                                                'email'],
+                                                            mid: student['mid'],
+                                                            classID: student[
+                                                                'classID'],
+                                                            sem_id: student[
+                                                                'sem_id'],
+                                                            yearS_id: student[
+                                                                'yearS_id'],
+                                                            statusID: student[
+                                                                'statusID'],
+                                                            sYearID: student[
+                                                                'SyearID'],
+                                                          ),
+                                                        ),
+                                                      );
+                                                      if (result == true) {
+                                                        // If PageB signals a refresh
+                                                        setState(() {
+                                                          fetchStudents(); // Refresh PageA
+                                                        });
+                                                      }
+                                                    },
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(Icons.edit,
+                                                            color: Color(
+                                                                0xFF345FB4)),
+                                                        Text(
+                                                          'ແກ້ໄຂ',
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xFF345FB4),
+                                                            fontFamily:
+                                                                'Phetsarath',
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      minimumSize: Size(
+                                                        80,
+                                                        50,
+                                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 10),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      SizedBox(height: 10),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                              );
+                            },
+                          ),
               ),
             ],
           ),

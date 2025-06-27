@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:registration_evaluation_app/screens/DistrictScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/districts/DistrictScreen.dart';
 // import './HomeScreen.dart';
 // import './RegisterScreen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:registration_evaluation_app/screens/ProvinceScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/provinces/ProvinceScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/academicScreen.dart';
-import 'package:registration_evaluation_app/screens/academic/registation/newStudent.dart';
+import 'package:registration_evaluation_app/screens/academic/registation/New/newStudent.dart';
 import 'package:registration_evaluation_app/screens/student/StudentScreen.dart';
 import 'package:registration_evaluation_app/screens/teacher/teacherScreen.dart';
 

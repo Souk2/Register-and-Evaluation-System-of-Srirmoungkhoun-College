@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:registration_evaluation_app/screens/DistrictScreen.dart';
-import 'package:registration_evaluation_app/screens/ProvinceScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/districts/DistrictScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/provinces/ProvinceScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/classroom/classrooms.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/evaluations/evaluation.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/upClasses/upClass.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/majors/major.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/students/studentPage.dart';
 
@@ -18,6 +18,9 @@ class _ManagementState extends State<Management> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         backgroundColor: Colors.blueAccent,
         title: Text(
           "ຈັດການຂໍ້ມູນ",
@@ -65,532 +68,466 @@ class _ManagementState extends State<Management> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color.fromARGB(255, 0, 255, 242),
-                                Color.fromARGB(255, 191, 255, 253),
+                        Column(
+                          children: [
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) => StudentPage()));
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.badge_outlined,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ນັກສຶກສາ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) => Classrooms())),
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.wallet_giftcard_outlined,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ຫ້ອງຮຽນ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => {
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) => const CategoryScreen(),
+                                        //   ),
+                                        // )
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.auto_stories_outlined,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ວິຊາຮຽນ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
                             ),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          padding: EdgeInsets.all(6),
-                          margin: EdgeInsets.all(5),
-                          child: Column(
-                            children: [
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      StudentPage()));
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.badge_outlined,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ນັກສຶກສາ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () => {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      Classrooms())),
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.wallet_giftcard_outlined,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ຫ້ອງຮຽນ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () => {
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(
-                                          //     builder: (context) => const CategoryScreen(),
-                                          //   ),
-                                          // )
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.auto_stories_outlined,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ວິຊາຮຽນ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 15),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () => {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) => Major())),
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.add_box,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ສາຂາຮຽນ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {},
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.assignment_ind_outlined,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ພະນັກງານ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {},
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.wallet_giftcard_outlined,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ຄະແນນ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 15),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      Evaluation()));
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.arrow_circle_up,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ເລືອນຊັ້ນຮຽນ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => {
+                                        Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const DistrictScreen(),
-                                            ),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
+                                                builder: (_) => Major())),
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
                                           ),
                                         ),
-                                        child: Icon(
-                                          Icons.location_city,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
+                                      ),
+                                      child: Icon(
+                                        Icons.add_box,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ສາຂາຮຽນ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ເມືອງ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
+                                      child: Icon(
+                                        Icons.assignment_ind_outlined,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ພະນັກງານ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
+                                      child: Icon(
+                                        Icons.wallet_giftcard_outlined,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ຄະແນນ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const ProvinceScreen(),
-                                            ),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          minimumSize: Size(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3,
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.3),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
+                                                builder: (_) => UpClass()));
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
                                           ),
                                         ),
-                                        child: Icon(
-                                          Icons.map,
-                                          size: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.14,
-                                          color: Color(0xFF345FB4),
-                                          shadows: [
-                                            Shadow(
-                                              offset: Offset(2, 2),
-                                              blurRadius: 4,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_circle_up,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ເລືອນຊັ້ນຮຽນ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const DistrictScreen(),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(height: 5),
-                                      Text(
-                                        'ແຂວງ',
-                                        style: TextStyle(
-                                          color: Color(0xFF345FB4),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
+                                      child: Icon(
+                                        Icons.location_city,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ເມືອງ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ProvinceScreen(),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                      child: Icon(
+                                        Icons.map,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Color(0xFF345FB4),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ແຂວງ',
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),

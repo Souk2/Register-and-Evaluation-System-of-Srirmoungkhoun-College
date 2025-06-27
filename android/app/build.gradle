@@ -7,16 +7,27 @@ plugins {
 
 android {
     namespace = "com.example.registration_evaluation_app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
+    // ndkVersion = flutter.ndkVersion
+    ndkVersion = "25.1.8937393"
+
+
+    // compileOptions {
+    //     sourceCompatibility = JavaVersion.VERSION_1_8
+    //     targetCompatibility = JavaVersion.VERSION_1_8
+    // }
+
+    // kotlinOptions {
+    //     jvmTarget = JavaVersion.VERSION_1_8
+    // }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17 // Or JavaVersion.VERSION_1_8 if you prefer
+        targetCompatibility JavaVersion.VERSION_17 // Or JavaVersion.VERSION_1_8 if you prefer
     }
-
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17" // Or "1.8"
     }
 
     defaultConfig {

@@ -67,6 +67,9 @@ class _EditProvinceScreenState extends State<EditProvinceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເເກ້ໄຂຊື່ແຂວງ',
           style: TextStyle(

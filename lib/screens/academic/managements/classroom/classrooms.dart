@@ -19,6 +19,9 @@ class _ClassroomsState extends State<Classrooms> {
   TextEditingController txtsearch = TextEditingController();
   TextEditingController _searchController = TextEditingController();
 
+  bool _isLoading = false;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +42,11 @@ class _ClassroomsState extends State<Classrooms> {
   }
 
   void fetchClassrooms() async {
+    setState(() {
+      _isLoading = true; // It use for reloading information
+      _errorMessage = null;
+    });
+
     try {
       final fetchedMajors = await Classroomservice.getClassrooms();
       setState(() {
@@ -47,6 +55,9 @@ class _ClassroomsState extends State<Classrooms> {
     } catch (e) {
       print("Error: $e");
     }
+
+    // Use for break the loading when found the information from API
+    setState(() => _isLoading = false);
   }
 
   void deleteClassrooms(int classID) async {
@@ -158,6 +169,9 @@ class _ClassroomsState extends State<Classrooms> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           "ຈັດການຫ້ອງຮຽນ",
           style: TextStyle(
@@ -171,7 +185,7 @@ class _ClassroomsState extends State<Classrooms> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orangeAccent,
               shape: CircleBorder(),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(10),
             ),
             onPressed: () {
               // TODO: Refresh action
@@ -186,7 +200,7 @@ class _ClassroomsState extends State<Classrooms> {
             child: Icon(
               Icons.refresh,
               color: Colors.white,
-              size: 30,
+              size: 25,
             ),
           ),
         ],
@@ -229,7 +243,11 @@ class _ClassroomsState extends State<Classrooms> {
                       MaterialPageRoute(
                         builder: (context) => AddClassroom(),
                       ),
-                    ),
+                    ).then((value) {
+                      setState(() {
+                        fetchClassrooms();
+                      });
+                    }),
                   }, // Opens the book entry dialog
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -255,138 +273,203 @@ class _ClassroomsState extends State<Classrooms> {
           ),
           SizedBox(height: 10),
           Expanded(
-            child: ListView.builder(
-              itemCount: classrooms.length,
-              itemBuilder: (context, index) {
-                final classroom = classrooms[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Row(
-                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: _isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Spacer(),
-                        Column(
-                          // crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'ຫ້ອງ ',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    fontFamily: 'Phetsarath',
-                                  ),
-                                ),
-                                Text(
-                                  '${classroom['classroom']}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    fontFamily: 'Phetsarath',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        PopupMenuButton(
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'ປຸ່ມຄຳສັ່ງ:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Phetsarath',
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      bool? result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => EditClassroom(
-                                            classID: classroom['classID'],
-                                            classroom: classroom['classroom'],
-                                          ),
-                                        ),
-                                      );
-                                      if (result == true) {
-                                        fetchClassrooms();
-                                      }
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.edit,
-                                            color: Color(0xFF345FB4)),
-                                        Text(
-                                          'ແກ້ໄຂ',
-                                          style: TextStyle(
-                                            color: Color(0xFF345FB4),
-                                            fontFamily: 'Phetsarath',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      minimumSize: Size(
-                                        80,
-                                        50,
-                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                    onPressed: () => {
-                                      ConfirmDelete(classroom['classID']),
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.delete, color: Colors.white),
-                                        Text(
-                                          'ລົບ',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontFamily: 'Phetsarath',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.redAccent,
-                                      minimumSize: Size(
-                                        80,
-                                        50,
-                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        CircularProgressIndicator(), // loading icon
+                        SizedBox(height: 10),
+                        Text(
+                          'ໂລດຂໍ້ມູນ...',
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
+                  )
+                : classrooms.isEmpty
+                    ? Center(
+                        child: Text(
+                          "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: classrooms.length,
+                        itemBuilder: (context, index) {
+                          final classroom = classrooms[index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashColor: Colors.blueAccent
+                                    .withOpacity(0.3), // สีของ ripple effect
+                                // hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  bool? result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditClassroom(
+                                        classID: classroom['classID'],
+                                        classroom: classroom['classroom'],
+                                      ),
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    setState(() {
+                                      fetchClassrooms();
+                                    });
+                                  }
+                                },
+                                child: Row(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Spacer(),
+                                    Column(
+                                      // crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'ຫ້ອງ ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                                fontFamily: 'Phetsarath',
+                                              ),
+                                            ),
+                                            Text(
+                                              '${classroom['classroom']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                                fontFamily: 'Phetsarath',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    PopupMenuButton(
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'ປຸ່ມຄຳສັ່ງ:',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Phetsarath',
+                                                ),
+                                              ),
+                                              SizedBox(height: 5),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  Navigator.of(context).pop();
+                                                  bool? result =
+                                                      await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditClassroom(
+                                                        classID: classroom[
+                                                            'classID'],
+                                                        classroom: classroom[
+                                                            'classroom'],
+                                                      ),
+                                                    ),
+                                                  );
+                                                  if (result == true) {
+                                                    setState(() {
+                                                      fetchClassrooms();
+                                                    });
+                                                  }
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.edit,
+                                                        color:
+                                                            Color(0xFF345FB4)),
+                                                    Text(
+                                                      'ແກ້ໄຂ',
+                                                      style: TextStyle(
+                                                        color:
+                                                            Color(0xFF345FB4),
+                                                        fontFamily:
+                                                            'Phetsarath',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  minimumSize: Size(
+                                                    80,
+                                                    50,
+                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              ElevatedButton(
+                                                onPressed: () => {
+                                                  Navigator.of(context).pop(),
+                                                  ConfirmDelete(
+                                                      classroom['classID']),
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete,
+                                                        color: Colors.white),
+                                                    Text(
+                                                      'ລົບ',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontFamily:
+                                                            'Phetsarath',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.redAccent,
+                                                  minimumSize: Size(
+                                                    80,
+                                                    50,
+                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

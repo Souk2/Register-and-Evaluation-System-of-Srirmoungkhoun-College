@@ -98,6 +98,7 @@ class _AddDistrictScreenState extends State<AddDistrictScreen> {
           ),
         );
         _tittlecontroller.clear();
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -121,6 +122,9 @@ class _AddDistrictScreenState extends State<AddDistrictScreen> {
     // getData(); // use from dropdownbutton
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເພີ່ມເມືອງ',
           style: TextStyle(

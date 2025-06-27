@@ -26,6 +26,7 @@ class _AddMajorState extends State<AddMajor> {
           ),
         );
         _tittlecontroller.clear();
+        Navigator.of(context).pop();
 
         showAlert();
       } else {
@@ -61,6 +62,9 @@ class _AddMajorState extends State<AddMajor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເພີ່ມສາຂາຮຽນ',
           style: TextStyle(

@@ -24,6 +24,7 @@ class _AddProvinceScreenState extends State<AddProvinceScreen> {
           ),
         );
         _tittlecontroller.clear();
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -41,6 +42,9 @@ class _AddProvinceScreenState extends State<AddProvinceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(
           'ເພີ່ມແຂວງ',
           style: TextStyle(

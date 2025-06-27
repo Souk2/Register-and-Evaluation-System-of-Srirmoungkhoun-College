@@ -27,6 +27,7 @@ class EditStudentPage extends StatefulWidget {
   final int sem_id;
   final int yearS_id;
   final int statusID;
+  final int sYearID;
   const EditStudentPage({
     super.key,
     required this.stdID,
@@ -45,6 +46,7 @@ class EditStudentPage extends StatefulWidget {
     required this.sem_id,
     required this.yearS_id,
     required this.statusID,
+    required this.sYearID,
   });
 
   @override
@@ -61,6 +63,14 @@ class _EditStudentPageState extends State<EditStudentPage> {
   //ສົກຮຽນ
   List<dynamic> yearData = []; // use from dropdownbutton
   int? _valueYear; // use from dropdownbutton
+
+  //ປີຮຽນ
+  List<dynamic> studyyearData = []; // use from dropdownbutton
+  int? _valueSyear; // use from dropdownbutton
+
+  //ສະຖານະການຮຽນ
+  List<dynamic> statuSData = []; // use from dropdownbutton
+  int? _valueStatuS; // use from dropdownbutton
 
   //ທີ່ຢູ່ເກີດ
   List<dynamic> provincesBData = [];
@@ -87,10 +97,6 @@ class _EditStudentPageState extends State<EditStudentPage> {
   //ພາກຮຽນ
   List<dynamic> semData = [];
   int? _valueSem;
-
-  //ສະຖານະການຮຽນ
-  List<dynamic> statuSData = []; // use from dropdownbutton
-  int? _valueStatuS; // use from dropdownbutton
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -137,6 +143,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
       final resSemesters = await http.get(Uri.parse("$baseUrl/sem"));
       final resYears = await http.get(Uri.parse("$baseUrl/yearstd"));
       final resStatusSt = await http.get(Uri.parse("$baseUrl/staS"));
+      final resStudyYear = await http.get(Uri.parse("$baseUrl/syear"));
 
       if (resDistricts.statusCode == 200 &&
           resDistrictsofb.statusCode == 200 &&
@@ -145,6 +152,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
           resMajors.statusCode == 200 &&
           resSemesters.statusCode == 200 &&
           resYears.statusCode == 200 &&
+          resStudyYear.statusCode == 200 &&
           resStatusSt.statusCode == 200) {
         final districts = jsonDecode(resDistricts.body);
         final districtsofb = jsonDecode(resDistrictsofb.body);
@@ -154,6 +162,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
         final semesters = jsonDecode(resSemesters.body);
         final years = jsonDecode(resYears.body);
         final statusSt = jsonDecode(resStatusSt.body);
+        final staudyYear = jsonDecode(resStudyYear.body);
 
         setState(() {
           _isLoading = false;
@@ -168,6 +177,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
           semData = semesters;
           yearData = years;
           statuSData = statusSt;
+          studyyearData = staudyYear;
 
           // ✅ Set initial values from widget
           _valueClass = widget.classID;
@@ -175,6 +185,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
           _valueSem = widget.sem_id;
           _valueYear = widget.yearS_id;
           _valueStatuS = widget.statusID;
+          _valueSyear = widget.sYearID;
 
           _valueDisN = widget.dsid;
           _valueDisB = widget.dsBid;
@@ -205,10 +216,10 @@ class _EditStudentPageState extends State<EditStudentPage> {
         throw Exception("One or more API failed");
       }
     } catch (error) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Error fetching data: $error';
-      });
+      // setState(() {
+      //   _isLoading = false;
+      //   _errorMessage = 'Error fetching data: $error';
+      // });
       print("Error: $error");
     }
   }
@@ -319,14 +330,13 @@ class _EditStudentPageState extends State<EditStudentPage> {
     }
   }
 
-  final _phoneController = TextEditingController();
-
   final TextEditingController _stdID = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _surname = TextEditingController();
   final TextEditingController _villageOB = TextEditingController();
   final TextEditingController _villageNow = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   String formatEmailForDatabase(String input) {
     // Trim spaces and ensure it's in lower case for consistency
@@ -385,6 +395,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
         _valueDisB,
         _phoneController.text,
         _emailController.text,
+        _valueSyear,
         _valueMajor,
         _valueClass,
         _valueSem,
@@ -405,7 +416,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
         );
         ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
         Navigator.of(context).pop(); // ปิด dialog
-        Navigator.of(context).pop(); // ย้อนกลับไปหน้าก่อนหน้านี้
+        Navigator.of(context).pop(true); // ย้อนกลับไปหน้าก่อนหน้านี้
 
         showAlert();
       } else {
@@ -730,7 +741,10 @@ class _EditStudentPageState extends State<EditStudentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blueAccent,
         title: Text(
           "ແກ້ໄຂຂໍ້ມູນນັກສຶກສາ",
           style: TextStyle(
@@ -859,6 +873,63 @@ class _EditStudentPageState extends State<EditStudentPage> {
                 SizedBox(
                   height: 10,
                 ),
+                Row(
+                  children: [
+                    Spacer(),
+                    Spacer(),
+                    Text(
+                      "ສຶກສາປີທີ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontFamily: 'Phetsarath',
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: Colors.black, width: 1), // Border
+                        ),
+                        child: DropdownButton(
+                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          underline: SizedBox.shrink(),
+                          isExpanded: true,
+                          items: studyyearData.map((e) {
+                            return DropdownMenuItem(
+                              child: Text(
+                                e["Syear"],
+                                style: TextStyle(
+                                  fontFamily: 'Phetsarath',
+                                ),
+                              ),
+                              value: e["SyearID"],
+                            );
+                          }).toList(),
+                          value: _valueSyear,
+                          onChanged: (v) {
+                            setState(() {
+                              _valueSyear = v as int;
+                            });
+                          },
+                          hint: Text(
+                            "ສົກຮຽນ",
+                            style: TextStyle(
+                              fontFamily: 'Phetsarath',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
                 Divider(
                   color: Colors.blueAccent,
                 ),
@@ -886,6 +957,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(
                   height: 10,
@@ -904,6 +981,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(
@@ -921,6 +1004,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -1156,6 +1245,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -1275,6 +1370,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -1312,6 +1413,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                                 offset: formattedEmail.length),
                           );
                         },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(
@@ -1336,6 +1443,12 @@ class _EditStudentPageState extends State<EditStudentPage> {
                           ),
                           counterText: "",
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
