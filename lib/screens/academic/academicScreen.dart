@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:registration_evaluation_app/screens/LoginScreen%20.dart';
+import 'package:registration_evaluation_app/screens/academic/evaluation/evaluations.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/Management.dart';
 import 'package:registration_evaluation_app/screens/academic/payments/payment.dart';
 import 'package:registration_evaluation_app/screens/academic/registation/New/newStudent.dart';
 import 'package:registration_evaluation_app/screens/academic/registation/Old/oldStudentRe.dart';
+import 'package:registration_evaluation_app/screens/academic/upClasses/upClass.dart';
 
 // สร้าง enum เพื่อใช้เป็นค่าใน Radio buttons
 enum StudentType { newStudent, oldStudent }
@@ -181,7 +183,7 @@ class _AcademicScreenState extends State<AcademicScreen> {
               _buildFeatureCard(
                 title: 'ຈັດການຂໍ້ມູນ',
                 description: 'ແກ້ໄຂຂໍ້ມູນ ແລະ ຈັດການ\nລາຍລະອຽດຕ່າງໆ',
-                icon: Icons.person,
+                icon: Icons.manage_accounts,
                 onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => Management()));
@@ -197,12 +199,6 @@ class _AcademicScreenState extends State<AcademicScreen> {
                 },
               ),
               _buildFeatureCard(
-                title: 'ປະເມີນຜົນການຮຽນ',
-                description: 'ເຮັດການຕັດເກຣດໃຫ້ຄະແນນ\nພິມຜົນຄະແນນ',
-                icon: Icons.grade_rounded,
-                onTap: () {},
-              ),
-              _buildFeatureCard(
                 title: 'ຊຳລະຄ່າຮຽນ',
                 description:
                     'ເຮັດການປ່ຽນແປງສະຖານະ\nການຈ່າບຄ່າຮຽນຕ່າງໆສຳລັບນັກສຶກສາ',
@@ -210,6 +206,24 @@ class _AcademicScreenState extends State<AcademicScreen> {
                 onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => Payment()));
+                },
+              ),
+              _buildFeatureCard(
+                title: 'ເລືອນຊັ້ນຮຽນ',
+                description: 'ເຮັດການເລືອນຊັ້ນຮຽນ\nນັກສຶກສາ ປີ1 ແລະ ປີ2',
+                icon: Icons.arrow_circle_up_rounded,
+                onTap: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => UpClass()));
+                },
+              ),
+              _buildFeatureCard(
+                title: 'ປະເມີນຜົນການຮຽນ',
+                description: 'ເຮັດການຕັດເກຣດໃຫ້ຄະແນນ\nພິມຜົນຄະແນນ',
+                icon: Icons.grade_rounded,
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => Evaluations()));
                 },
               ),
               _buildFeatureCard(

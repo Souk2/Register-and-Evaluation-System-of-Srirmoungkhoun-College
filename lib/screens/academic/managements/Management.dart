@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/districts/DistrictScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/staffPage.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/provinces/ProvinceScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/classroom/classrooms.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/upClasses/upClass.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/subjects/subjectPage.dart';
+import 'package:registration_evaluation_app/screens/academic/upClasses/upClass.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/majors/major.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/students/studentPage.dart';
 
@@ -176,12 +178,13 @@ class _ManagementState extends State<Management> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () => {
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) => const CategoryScreen(),
-                                        //   ),
-                                        // )
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SubjectPage(),
+                                          ),
+                                        )
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,
@@ -281,7 +284,12 @@ class _ManagementState extends State<Management> {
                                 Column(
                                   children: [
                                     ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) => StaffPage()));
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,
                                         minimumSize: Size(
@@ -322,105 +330,12 @@ class _ManagementState extends State<Management> {
                                     ),
                                   ],
                                 ),
-                                Column(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        minimumSize: Size(
-                                            MediaQuery.of(context).size.width *
-                                                0.3,
-                                            MediaQuery.of(context).size.width *
-                                                0.3),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.wallet_giftcard_outlined,
-                                        size:
-                                            MediaQuery.of(context).size.width *
-                                                0.14,
-                                        color: Color(0xFF345FB4),
-                                        shadows: [
-                                          Shadow(
-                                            offset: Offset(2, 2),
-                                            blurRadius: 4,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'ຄະແນນ',
-                                      style: TextStyle(
-                                        color: Color(0xFF345FB4),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        fontFamily: 'Phetsarath',
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                             SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Column(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) => UpClass()));
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        minimumSize: Size(
-                                            MediaQuery.of(context).size.width *
-                                                0.3,
-                                            MediaQuery.of(context).size.width *
-                                                0.3),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.arrow_circle_up,
-                                        size:
-                                            MediaQuery.of(context).size.width *
-                                                0.14,
-                                        color: Color(0xFF345FB4),
-                                        shadows: [
-                                          Shadow(
-                                            offset: Offset(2, 2),
-                                            blurRadius: 4,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'ເລືອນຊັ້ນຮຽນ',
-                                      style: TextStyle(
-                                        color: Color(0xFF345FB4),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        fontFamily: 'Phetsarath',
-                                      ),
-                                    ),
-                                  ],
-                                ),
                                 Column(
                                   children: [
                                     ElevatedButton(

@@ -34,6 +34,13 @@ class _NewStdPayState extends State<NewStdPay> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  bool isFullyPaid = false;
+  String? lastReceiptNumber;
+  String? receiptStatus; // เช่น "จ่ายแค่ครึ่งเทอม"
+
+  // จ่ายบางเทอม (ครึ่งเทอม) to disable checkBox money
+  bool isPartialPaid = false;
+
   // ดึงข้อมูล term ที่จ่ายแล้ว
   List<String> paidTerms = [];
   List<String> availableTerms = ['1', '2'];
@@ -62,10 +69,13 @@ class _NewStdPayState extends State<NewStdPay> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchStudentInfo();
       _fetchStdYMC();
+      _fetchLastReceipt();
     });
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   final TextEditingController _stdID = TextEditingController();
   final TextEditingController _name = TextEditingController();
@@ -173,10 +183,32 @@ class _NewStdPayState extends State<NewStdPay> {
       final List<dynamic> terms = jsonDecode(res.body);
       paidTerms = terms.map((t) => t.toString()).toList();
 
-      // กรองเฉพาะ term ที่ยังไม่จ่าย
-      availableTerms =
-          ['1', '2'].where((term) => !paidTerms.contains(term)).toList();
+      // เงื่อนไข:
+      isFullyPaid = paidTerms.contains('1') && paidTerms.contains('2');
+      isPartialPaid =
+          paidTerms.length == 1; // จ่ายแค่เทอมเดียว to disable checkBox money
+
+      // กรอง term ที่เหลือ
+      availableTerms = ['1', '2'].where((t) => !paidTerms.contains(t)).toList();
       if (!availableTerms.contains(selectedTerm)) selectedTerm = null;
+      setState(() {});
+    }
+  }
+
+  //ฟังก์ชันโหลดเลขใบเสร็จ
+  Future<void> _fetchLastReceipt() async {
+    final stdID = _stdID.text.trim();
+    final res = await http
+        .get(Uri.parse("$baseUrl/student-payment/last-receipt/$stdID"));
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      lastReceiptNumber = data['receipt_number'];
+      receiptStatus = data['status']; // ✅ เช่น "จ่ายแค่ครึ่งเทอม"
+      setState(() {});
+    } else {
+      lastReceiptNumber = null;
+      receiptStatus = null;
       setState(() {});
     }
   }
@@ -244,7 +276,7 @@ class _NewStdPayState extends State<NewStdPay> {
               ),
             ),
             content: Text(
-              "ເລກໃບບິນ: ${result['receipt_number']}\nລວມເປັນເງິນ: $result['total_paid'] ກີບ",
+              "ເລກໃບບິນ: ${result['receipt_number']}\nລວມເປັນເງິນ: ${result['total_paid']} ກີບ",
               style: TextStyle(
                 fontFamily: 'Phetsarath',
               ),
@@ -362,6 +394,12 @@ class _NewStdPayState extends State<NewStdPay> {
                   _submitPayment();
                   Navigator.of(context).pop(true); // ย้อนกลับไปหน้าก่อนหน้านี้
 
+                  Navigator.of(context).pop(true);
+
+                  Navigator.of(context).pop(true);
+
+                  Navigator.of(context).pop(true);
+
                   showAlert();
                 }
               },
@@ -380,7 +418,16 @@ class _NewStdPayState extends State<NewStdPay> {
   }
 
   @override
+  @override
   void dispose() {
+    _stdID.dispose();
+    _name.dispose();
+    _surname.dispose();
+    _yearController.dispose();
+    _classController.dispose();
+    _majorController.dispose();
+    _yearSController.dispose();
+    amountPaidController.dispose();
     _amountController.dispose();
     super.dispose();
   }
@@ -672,6 +719,7 @@ class _NewStdPayState extends State<NewStdPay> {
                   child: DropdownButton<String>(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                     underline: SizedBox.shrink(),
+                    borderRadius: BorderRadius.circular(20),
                     isExpanded: true,
                     value: selectedTerm,
                     hint: Text(
@@ -685,12 +733,14 @@ class _NewStdPayState extends State<NewStdPay> {
                             style: TextStyle(fontFamily: 'Phetsarath')),
                       );
                     }).toList(),
-                    onChanged: (val) {
-                      selectedTerm = val;
-                      payFullYear = false;
-                      _updateAmountPaid();
-                      setState(() {});
-                    },
+                    onChanged: payFullYear
+                        ? null // 🔒 ถ้าเช็คจ่ายทั้งปี จะ disable dropdown
+                        : (val) {
+                            selectedTerm = val;
+                            payFullYear = false;
+                            _updateAmountPaid();
+                            setState(() {});
+                          },
                   ),
                 ),
                 SizedBox(
@@ -700,12 +750,14 @@ class _NewStdPayState extends State<NewStdPay> {
                 // ☑️ จ่ายทั้งปี
                 CheckboxListTile(
                   value: payFullYear,
-                  onChanged: (val) {
-                    payFullYear = val!;
-                    selectedTerm = null;
-                    _updateAmountPaid();
-                    setState(() {});
-                  },
+                  onChanged: (isFullyPaid || isPartialPaid)
+                      ? null // ✅ ปิดการใช้งาน checkbox ถ้าจ่ายครบ
+                      : (val) {
+                          payFullYear = val!;
+                          selectedTerm = null;
+                          _updateAmountPaid();
+                          setState(() {});
+                        },
                   title: Text(
                     "ຈ່າຍທັ້ງປີການສຶກສາ (2 ເທີມ)",
                     style: TextStyle(
@@ -713,6 +765,34 @@ class _NewStdPayState extends State<NewStdPay> {
                     ),
                   ),
                 ),
+
+                // ຖ້າຈ່າຍພຽງເຄິ່ງເທີມ ໃຫ້ສະແດງໃບບິນພ້ອມບອກສະຖານະ ຈ່າຍເຄິ່ງເທີມ / ຖ້າຈ່າຍຄົບ ໃຫ້ສະແດງໃບບິນພ້ອມບອກສະຖານະ ຈ່າຍຄົບ
+                if (lastReceiptNumber != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "🧾 ໃບບິນ: $lastReceiptNumber",
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontFamily: 'Phetsarath',
+                        ),
+                      ),
+                      if (receiptStatus != null)
+                        Text(
+                          "📌 ສະຖານະ : $receiptStatus",
+                          style: TextStyle(
+                            color: receiptStatus == "ຈ່າຍເຄິ່ງເທີມ"
+                                ? Colors.orange
+                                : Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                    ],
+                  ),
                 SizedBox(
                   height: 10,
                 ),

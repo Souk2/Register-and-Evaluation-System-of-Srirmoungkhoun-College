@@ -13,7 +13,7 @@ class Major extends StatefulWidget {
 
 class _MajorState extends State<Major> {
   List<dynamic> majors = [];
-  TextEditingController txtsearch = TextEditingController();
+
   TextEditingController _searchController = TextEditingController();
 
   bool _isLoading = false;
@@ -164,6 +164,12 @@ class _MajorState extends State<Major> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -209,6 +215,9 @@ class _MajorState extends State<Major> {
             margin: EdgeInsets.all(10),
             child: TextField(
               controller: _searchController,
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
               decoration: InputDecoration(
                 hintText: 'ຄົ້ນຫາສາຂາຮຽນ...',
                 hintStyle: TextStyle(
@@ -334,6 +343,9 @@ class _MajorState extends State<Major> {
                                     Column(
                                       // crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
+                                        SizedBox(
+                                          height: 10,
+                                        ),
                                         Text(
                                           '${major['m_name']}',
                                           style: TextStyle(
@@ -342,110 +354,12 @@ class _MajorState extends State<Major> {
                                             fontFamily: 'Phetsarath',
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    PopupMenuButton(
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'ປຸ່ມຄຳສັ່ງ:',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Phetsarath',
-                                                ),
-                                              ),
-                                              SizedBox(height: 5),
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  Navigator.of(context).pop();
-                                                  bool? result =
-                                                      await Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          EditMajor(
-                                                        mid: major['mid'],
-                                                        m_name: major['m_name'],
-                                                      ),
-                                                    ),
-                                                  );
-                                                  if (result == true) {
-                                                    setState(() {
-                                                      fetchMajors();
-                                                    });
-                                                  }
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.edit,
-                                                        color:
-                                                            Color(0xFF345FB4)),
-                                                    Text(
-                                                      'ແກ້ໄຂ',
-                                                      style: TextStyle(
-                                                        color:
-                                                            Color(0xFF345FB4),
-                                                        fontFamily:
-                                                            'Phetsarath',
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.white,
-                                                  minimumSize: Size(
-                                                    80,
-                                                    50,
-                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: 10),
-                                              ElevatedButton(
-                                                onPressed: () => {
-                                                  Navigator.of(context).pop(),
-                                                  ConfirmDelete(major['mid']),
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.delete,
-                                                        color: Colors.white),
-                                                    Text(
-                                                      'ລົບ',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontFamily:
-                                                            'Phetsarath',
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      Colors.redAccent,
-                                                  minimumSize: Size(
-                                                    80,
-                                                    50,
-                                                  ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                        SizedBox(
+                                          height: 10,
                                         ),
                                       ],
                                     ),
+                                    Spacer(),
                                   ],
                                 ),
                               ),

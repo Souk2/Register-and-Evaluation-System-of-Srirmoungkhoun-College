@@ -42,7 +42,7 @@ class _StudentPageState extends State<StudentPage> {
   void fetchSearchStudents({String? searchQuery}) async {
     try {
       final fetchStudents = searchQuery == null || searchQuery.isEmpty
-          ? await Studentservice.getStudents()
+          ? await Studentservice.getStudentsAll()
           : await Studentservice.searchStudents(searchQuery);
       print(searchQuery);
       setState(() {
@@ -64,7 +64,8 @@ class _StudentPageState extends State<StudentPage> {
     }
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   Future<void> _fetchAllDropdownData() async {
     setState(() {
@@ -155,6 +156,12 @@ class _StudentPageState extends State<StudentPage> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -236,6 +243,7 @@ class _StudentPageState extends State<StudentPage> {
                       ),
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(20),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
                         items: studyyearData.map((e) {
@@ -276,6 +284,7 @@ class _StudentPageState extends State<StudentPage> {
                       ),
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(20),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
                         items: statuSData.map((e) {
@@ -317,6 +326,7 @@ class _StudentPageState extends State<StudentPage> {
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(20),
                         isExpanded: true,
                         items: yearData.map((e) {
                           return DropdownMenuItem(
@@ -369,7 +379,7 @@ class _StudentPageState extends State<StudentPage> {
                     : filteredStudents.isEmpty
                         ? Center(
                             child: Text(
-                              "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                              "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
                               style: TextStyle(
                                 fontFamily: 'Phetsarath',
                               ),
@@ -396,6 +406,7 @@ class _StudentPageState extends State<StudentPage> {
                                         MaterialPageRoute(
                                           builder: (context) => EditStudentPage(
                                             stdID: student['stdID'],
+                                            image_url: student['image_url'],
                                             stdName: student['stdName'],
                                             stdSurname: student['stdSurname'],
                                             dob: student['dob'],
@@ -418,7 +429,7 @@ class _StudentPageState extends State<StudentPage> {
                                       if (result == true) {
                                         // If PageB signals a refresh
                                         setState(() {
-                                          fetchStudents(); // Refresh PageA
+                                          fetchStudents(); // Refresh Page
                                         });
                                       }
                                     },
@@ -429,6 +440,29 @@ class _StudentPageState extends State<StudentPage> {
                                         Column(
                                           // crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            if (student['image_url'] != null)
+                                              Center(
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    student['image_url'],
+                                                    width: 120,
+                                                    height: 120,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        Icon(Icons.error),
+                                                  ),
+                                                ),
+                                              ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
                                             Text(
                                               '${student['stdID']}',
                                               style: TextStyle(
@@ -511,111 +545,111 @@ class _StudentPageState extends State<StudentPage> {
                                           ],
                                         ),
                                         Spacer(),
-                                        PopupMenuButton(
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'ປຸ່ມຄຳສັ່ງ:',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily: 'Phetsarath',
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 5),
-                                                  ElevatedButton(
-                                                    onPressed: () async {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                      bool? result =
-                                                          await Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              EditStudentPage(
-                                                            stdID: student[
-                                                                'stdID'],
-                                                            stdName: student[
-                                                                'stdName'],
-                                                            stdSurname: student[
-                                                                'stdSurname'],
-                                                            dob: student['dob'],
-                                                            currentOpt: student[
-                                                                'gender'],
-                                                            village: student[
-                                                                'village'],
-                                                            dsid:
-                                                                student['dsid'],
-                                                            villageOfB: student[
-                                                                'villageOfB'],
-                                                            dsBid: student[
-                                                                'dsBid'],
-                                                            phoneNum: student[
-                                                                'phoneNum'],
-                                                            email: student[
-                                                                'email'],
-                                                            mid: student['mid'],
-                                                            classID: student[
-                                                                'classID'],
-                                                            sem_id: student[
-                                                                'sem_id'],
-                                                            yearS_id: student[
-                                                                'yearS_id'],
-                                                            statusID: student[
-                                                                'statusID'],
-                                                            sYearID: student[
-                                                                'SyearID'],
-                                                          ),
-                                                        ),
-                                                      );
-                                                      if (result == true) {
-                                                        // If PageB signals a refresh
-                                                        setState(() {
-                                                          fetchStudents(); // Refresh PageA
-                                                        });
-                                                      }
-                                                    },
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(Icons.edit,
-                                                            color: Color(
-                                                                0xFF345FB4)),
-                                                        Text(
-                                                          'ແກ້ໄຂ',
-                                                          style: TextStyle(
-                                                            color: Color(
-                                                                0xFF345FB4),
-                                                            fontFamily:
-                                                                'Phetsarath',
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor:
-                                                          Colors.white,
-                                                      minimumSize: Size(
-                                                        80,
-                                                        50,
-                                                      ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                        horizontal: 16,
-                                                        vertical: 12,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                        // PopupMenuButton(
+                                        //   itemBuilder: (context) => [
+                                        //     PopupMenuItem(
+                                        //       child: Column(
+                                        //         crossAxisAlignment:
+                                        //             CrossAxisAlignment.center,
+                                        //         children: [
+                                        //           Text(
+                                        //             'ປຸ່ມຄຳສັ່ງ:',
+                                        //             style: TextStyle(
+                                        //               fontWeight:
+                                        //                   FontWeight.bold,
+                                        //               fontFamily: 'Phetsarath',
+                                        //             ),
+                                        //           ),
+                                        //           SizedBox(height: 5),
+                                        //           ElevatedButton(
+                                        //             onPressed: () async {
+                                        //               Navigator.of(context)
+                                        //                   .pop();
+                                        //               bool? result =
+                                        //                   await Navigator.push(
+                                        //                 context,
+                                        //                 MaterialPageRoute(
+                                        //                   builder: (context) =>
+                                        //                       EditStudentPage(
+                                        //                     stdID: student[
+                                        //                         'stdID'],
+                                        //                     stdName: student[
+                                        //                         'stdName'],
+                                        //                     stdSurname: student[
+                                        //                         'stdSurname'],
+                                        //                     dob: student['dob'],
+                                        //                     currentOpt: student[
+                                        //                         'gender'],
+                                        //                     village: student[
+                                        //                         'village'],
+                                        //                     dsid:
+                                        //                         student['dsid'],
+                                        //                     villageOfB: student[
+                                        //                         'villageOfB'],
+                                        //                     dsBid: student[
+                                        //                         'dsBid'],
+                                        //                     phoneNum: student[
+                                        //                         'phoneNum'],
+                                        //                     email: student[
+                                        //                         'email'],
+                                        //                     mid: student['mid'],
+                                        //                     classID: student[
+                                        //                         'classID'],
+                                        //                     sem_id: student[
+                                        //                         'sem_id'],
+                                        //                     yearS_id: student[
+                                        //                         'yearS_id'],
+                                        //                     statusID: student[
+                                        //                         'statusID'],
+                                        //                     sYearID: student[
+                                        //                         'SyearID'],
+                                        //                   ),
+                                        //                 ),
+                                        //               );
+                                        //               if (result == true) {
+                                        //                 // If PageB signals a refresh
+                                        //                 setState(() {
+                                        //                   fetchStudents(); // Refresh PageA
+                                        //                 });
+                                        //               }
+                                        //             },
+                                        //             child: Row(
+                                        //               children: [
+                                        //                 Icon(Icons.edit,
+                                        //                     color: Color(
+                                        //                         0xFF345FB4)),
+                                        //                 Text(
+                                        //                   'ແກ້ໄຂ',
+                                        //                   style: TextStyle(
+                                        //                     color: Color(
+                                        //                         0xFF345FB4),
+                                        //                     fontFamily:
+                                        //                         'Phetsarath',
+                                        //                   ),
+                                        //                 ),
+                                        //               ],
+                                        //             ),
+                                        //             style: ElevatedButton
+                                        //                 .styleFrom(
+                                        //               backgroundColor:
+                                        //                   Colors.white,
+                                        //               minimumSize: Size(
+                                        //                 80,
+                                        //                 50,
+                                        //               ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                                        //               padding:
+                                        //                   EdgeInsets.symmetric(
+                                        //                 horizontal: 16,
+                                        //                 vertical: 12,
+                                        //               ),
+                                        //             ),
+                                        //           ),
+                                        //           SizedBox(height: 10),
+                                        //         ],
+                                        //       ),
+                                        //     ),
+                                        //   ],
+                                        // ),
                                       ],
                                     ),
                                   ),

@@ -1,11 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:registration_evaluation_app/screens/student/Settings.dart';
-import 'package:registration_evaluation_app/screens/student/timetable.dart';
 import 'package:http/http.dart' as http;
-
-List<Widget> itmpage = [StudentScreen(), Timetable(), Settings()];
+import 'package:registration_evaluation_app/screens/student/footers.dart';
 
 class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
@@ -78,114 +75,101 @@ Future<Student> fetchStudent() async {
 
 class _StudentScreenState extends State<StudentScreen> {
   // final _formSignInKey = GlobalKey<FormState>();
-  bool rememberPassword = true;
-  int idx = 0;
-
-  void ontabpPed(BuildContext context, int indx) {
+  Future<void> _refreshData() async {
+    // จำลองการโหลดข้อมูลใหม่ เช่นจาก API
+    await Future.delayed(Duration(seconds: 2));
     setState(() {
-      idx = indx;
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (a, b, c) => Footers(), // โหลดหน้าใหม่ทับ
+          transitionDuration: Duration.zero,
+        ),
+      );
     });
-
-    // ນຳທາງໄປໜ້າໃໝ່
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => itmpage[indx]),
-    );
-  }
-
-  Widget BottomBar() {
-    return BottomNavigationBar(
-      backgroundColor: Color(0xFF345FB4),
-      selectedIconTheme: IconThemeData(color: Colors.white, size: 35),
-      selectedLabelStyle: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-      ),
-      selectedFontSize: 15,
-      selectedItemColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      currentIndex: idx,
-      onTap: (index) {
-        ontabpPed(context, index); // ປ່ຽນ index ຂອງໜ້າປະຈຸບັນ
-      },
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: "ໜ້າຫຼັກ",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.microwave_outlined),
-          label: "ຕາຕະລາງຮຽນ",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings_rounded),
-          label: "ຕັ້ງຄ່າ",
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          const Expanded(flex: 1, child: SizedBox(height: 10)),
-          Expanded(
-            flex: 166,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // รูปภาพนักศึกษา
-                  CircleAvatar(
-                    radius: 90,
-                    backgroundImage: AssetImage(
-                        'assets/student.jpg'), // เพิ่มรูปภาพในโฟลเดอร์ assets
+      appBar: AppBar(
+        backgroundColor: Colors.blueAccent,
+        automaticallyImplyLeading: false,
+      ),
+      body: RefreshIndicator(
+        color: Colors.green,
+        onRefresh: _refreshData,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
                   ),
-                  SizedBox(height: 16),
-
-                  // กล่องข้อมูล
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildInfoRow("ລະຫັດນັກສຶກສາ", "SRI00032"),
-                          Divider(),
-                          _buildInfoRow("ຊື່", "Chansamai"),
-                          Divider(),
-                          _buildInfoRow("ນາມສະກຸນ", "koratasu"),
-                          Divider(),
-                          _buildInfoRow("ເພດ", "ຊາຍ"),
-                          Divider(),
-                          _buildInfoRow("ເບີໂທ", "020-1236-4567"),
-                          Divider(),
-                          _buildInfoRow("ຫ້ອງຮຽນ", "3D"),
-                          Divider(),
-                          _buildInfoRow("ພາກຮຽນ", "ພາກບ່າຍ"),
-                          Divider(),
-                          _buildInfoRow("ສຶກສາປີທີ", "3"),
-                          Divider(),
-                          _buildInfoRow("ວັນເດືອນປີເກີດ", "12-12-2008"),
-                          Divider(),
-                          _buildInfoRow("ທີ່ຢູ່ບ້ານເກີດ", "123 Main St"),
-                          Divider(),
-                          _buildInfoRow("ທີ່ຢູ່ບ້ານປັດຈຸບັນ", "Vientiane"),
-                        ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
                       ),
                     ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 16),
+                        // รูปภาพนักศึกษา
+                        CircleAvatar(
+                          radius: 90,
+                          // backgroundImage: AssetImage(
+                          //     'assets/student.jpg'), // เพิ่มรูปภาพในโฟลเดอร์ assets
+                        ),
+                        SizedBox(height: 16),
+
+                        // กล่องข้อมูล
+                        Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                _buildInfoRow("ລະຫັດນັກສຶກສາ", "SRI00032"),
+                                Divider(),
+                                _buildInfoRow("ຊື່", "Chansamai"),
+                                Divider(),
+                                _buildInfoRow("ນາມສະກຸນ", "koratasu"),
+                                Divider(),
+                                _buildInfoRow("ເພດ", "ຊາຍ"),
+                                Divider(),
+                                _buildInfoRow("ເບີໂທ", "020-1236-4567"),
+                                Divider(),
+                                _buildInfoRow("ຫ້ອງຮຽນ", "3D"),
+                                Divider(),
+                                _buildInfoRow("ພາກຮຽນ", "ພາກບ່າຍ"),
+                                Divider(),
+                                _buildInfoRow("ສຶກສາປີທີ", "3"),
+                                Divider(),
+                                _buildInfoRow("ວັນເດືອນປີເກີດ", "12-12-2008"),
+                                Divider(),
+                                _buildInfoRow("ທີ່ຢູ່ບ້ານເກີດ", "123 Main St"),
+                                Divider(),
+                                _buildInfoRow(
+                                    "ທີ່ຢູ່ບ້ານປັດຈຸບັນ", "Vientiane"),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-          BottomBar(),
-        ],
+          ],
+        ),
       ),
     );
   }

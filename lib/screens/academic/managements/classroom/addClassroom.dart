@@ -63,6 +63,12 @@ class _AddClassroomState extends State<AddClassroom> {
   }
 
   @override
+  void dispose() {
+    _tittlecontroller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -87,6 +93,9 @@ class _AddClassroomState extends State<AddClassroom> {
             children: [
               TextFormField(
                 controller: _tittlecontroller,
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                ),
                 decoration: InputDecoration(
                   labelText: 'ຊື່ຫ້ອງຮຽນ',
                   labelStyle: TextStyle(

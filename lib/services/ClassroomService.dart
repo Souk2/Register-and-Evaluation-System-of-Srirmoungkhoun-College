@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Classroomservice {
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
   // static const String baseUrl = "http://192.168.61.95:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   // Function get Majors
   static Future<List<dynamic>> getClassrooms() async {

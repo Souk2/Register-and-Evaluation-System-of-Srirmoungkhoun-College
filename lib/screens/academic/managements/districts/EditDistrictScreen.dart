@@ -34,37 +34,6 @@ class _EditDistrictScreenState extends State<EditDistrictScreen> {
     _titleController.text = widget.dname;
   }
 
-  // Future<void> _fetchData() async {
-  //   setState(() {
-  //     _isLoading = true;
-  //     _errorMessage = null; // Reset error message
-  //   });
-  //   try {
-  //     final response =
-  //         await http.get(Uri.parse("http://192.168.0.108:3000/province"));
-
-  //     if (response.statusCode == 200) {
-  //       setState(() {
-  //         data = jsonDecode(response.body);
-  //         _isLoading = false;
-  //       });
-  //     } else {
-  //       setState(() {
-  //         _isLoading = false;
-  //         _errorMessage =
-  //             'Failed to load data. Status code: ${response.statusCode}';
-  //       });
-  //       print('Error fetching data: ${response.statusCode}, ${response.body}');
-  //     }
-  //   } catch (error) {
-  //     setState(() {
-  //       _isLoading = false;
-  //       _errorMessage = 'An unexpected error occurred: $error';
-  //     });
-  //     print('Error fetching data: $error');
-  //   }
-  // }
-
   Future<void> _fetchData() async {
     setState(() {
       _isLoading = true;
@@ -170,11 +139,158 @@ class _EditDistrictScreenState extends State<EditDistrictScreen> {
     }
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _titleController.text = widget.dname;
-  // }
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitDeleteStubjects() async {
+    if (_formKey.currentState!.validate()) {
+      if (_titleController == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ກະລຸນາປ້ອນຂໍ້ມູນ!",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ), // Please select a province
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 1),
+          ),
+        );
+        return; // Stop submission if no province is selected
+      }
+
+      bool success = await Districtservice.deleteDistrict(
+        widget.dsid,
+      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ແກ້ໄຂຂໍ້ມູນນັກຮຽນຖືກບັນທຶກສຳເລັດແລ້ວ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
+        Navigator.of(context).pop(); // ปิด dialog
+        Navigator.of(context).pop(); // ย้อนกลับไปหน้าก่อนหน้านี้
+
+        showAlert();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ຂໍອະໄພ!ເກີດຂໍ້ຜິດພາດ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void ConfirmDelete() async {
+    print("ConfirmUpdate");
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(
+            'ຢືນຍັນການບັນທຶກ',
+            style: TextStyle(
+              fontFamily: 'Phetsarath',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'ທ່ານແນ່ໃຈວ່າຈະລຶມຫຼືບໍ່?',
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: 'Phetsarath',
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.orange,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(
+                'ຍົກເລີກ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                if (_value == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
+                      ), // Please select a province
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                  return; // Stop submission if no province is selected
+                } else {
+                  _submitDeleteStubjects();
+                }
+              },
+              child: Text(
+                'ຕົກລົງ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,9 +303,10 @@ class _EditDistrictScreenState extends State<EditDistrictScreen> {
           style: TextStyle(
             color: Colors.white,
             fontFamily: 'Phetsarath',
+            fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -200,6 +317,9 @@ class _EditDistrictScreenState extends State<EditDistrictScreen> {
               children: [
                 TextFormField(
                   controller: _titleController,
+                  style: TextStyle(
+                    fontFamily: 'Phetsarath',
+                  ),
                   decoration: InputDecoration(
                     labelText: 'ຊື່ເມືອງ',
                     labelStyle: TextStyle(
@@ -255,30 +375,75 @@ class _EditDistrictScreenState extends State<EditDistrictScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
+                        ),
+                        onPressed: () {
+                          ConfirmDelete();
+                          print("ບັນທຶກການຂໍ້ມູນນັກສຶກສາສຳເລັດ");
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              'ລຶບ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Phetsarath',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    onPressed: _updateDistrict,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.print),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text(
-                          'ບັນທຶກ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontFamily: 'Phetsarath',
+                    SizedBox(
+                      width: 30,
+                    ),
+                    Expanded(
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
                           ),
-                        ),
-                      ],
-                    ))
+                          onPressed: _updateDistrict,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.print,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'ບັນທຶກ',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFamily: 'Phetsarath',
+                                ),
+                              ),
+                            ],
+                          )),
+                    ),
+                  ],
+                )
               ],
             )),
       ),

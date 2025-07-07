@@ -21,7 +21,6 @@ class ProvinceScreen extends StatefulWidget {
 class _ProvinceScreenState extends State<ProvinceScreen> {
   List<dynamic> provinces = [];
 
-  TextEditingController txtsearch = TextEditingController();
   TextEditingController _searchController = TextEditingController();
 
   bool _isLoading = false;
@@ -131,6 +130,12 @@ class _ProvinceScreenState extends State<ProvinceScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -177,6 +182,9 @@ class _ProvinceScreenState extends State<ProvinceScreen> {
             margin: EdgeInsets.all(10),
             child: TextField(
               controller: _searchController,
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
               decoration: InputDecoration(
                 hintText: 'ຄົ້ນຫາແຂວງ...',
                 hintStyle: TextStyle(
@@ -232,20 +240,11 @@ class _ProvinceScreenState extends State<ProvinceScreen> {
                     ],
                   ),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
                     backgroundColor: Color(0xFFfb5b54),
                   ),
                 ),
               ),
-              // PopupMenuButton(
-              //   itemBuilder: (context) => [
-              //     PopupMenuItem(
-              //       child: Column(
-              //         children: [],
-              //       ),
-              //     ),
-              //   ],
-              // ),
             ],
           ),
           SizedBox(height: 10),
@@ -269,7 +268,7 @@ class _ProvinceScreenState extends State<ProvinceScreen> {
                 : provinces.isEmpty
                     ? Center(
                         child: Text(
-                          "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                          "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
                           style: TextStyle(
                             fontFamily: 'Phetsarath',
                           ),
@@ -284,125 +283,55 @@ class _ProvinceScreenState extends State<ProvinceScreen> {
                                 vertical: 8, horizontal: 16),
                             child: Padding(
                               padding: const EdgeInsets.all(6),
-                              child: Row(
-                                //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Spacer(),
-                                  Column(
-                                    // crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      // ),
-                                      Text(
-                                        '${province['pname']}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          fontFamily: 'Phetsarath',
-                                        ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                splashColor: Colors.blueAccent
+                                    .withOpacity(0.3), // สีของ ripple effect
+                                // hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  bool? result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditProvinceScreen(
+                                        pid: province['pid'],
+                                        pname: province['pname'],
                                       ),
-                                    ],
-                                  ),
-                                  Spacer(),
-                                  PopupMenuButton(
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'ປຸ່ມຄຳສັ່ງ:',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: 'Phetsarath',
-                                              ),
-                                            ),
-                                            SizedBox(height: 5),
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                // To close PopUpMenuB
-                                                Navigator.of(context).pop();
-                                                bool? result =
-                                                    await Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        EditProvinceScreen(
-                                                      pid: province['pid'],
-                                                      pname: province['pname'],
-                                                    ),
-                                                  ),
-                                                );
-                                                if (result == true) {
-                                                  // It would be refresh the informations in this Page
-                                                  setState(() {
-                                                    fetchProvinces();
-                                                  });
-                                                }
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.edit,
-                                                      color: Color(0xFF345FB4)),
-                                                  Text(
-                                                    'ແກ້ໄຂ',
-                                                    style: TextStyle(
-                                                      color: Color(0xFF345FB4),
-                                                      fontFamily: 'Phetsarath',
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.white,
-                                                minimumSize: Size(
-                                                  80,
-                                                  50,
-                                                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 12,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(height: 10),
-                                            ElevatedButton(
-                                              onPressed: () => {
-                                                Navigator.of(context).pop(),
-                                                ConfirmDelete(province['pid']),
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.delete,
-                                                      color: Colors.white),
-                                                  Text(
-                                                    'ລົບ',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontFamily: 'Phetsarath',
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.redAccent,
-                                                minimumSize: Size(
-                                                  80,
-                                                  50,
-                                                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    // It would be refresh the informations in this Page
+                                    setState(() {
+                                      fetchProvinces();
+                                    });
+                                  }
+                                },
+                                child: Row(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Spacer(),
+                                    Column(
+                                      // crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          height: 10,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                        Text(
+                                          '${province['pname']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            fontFamily: 'Phetsarath',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    Spacer(),
+                                  ],
+                                ),
                               ),
                             ),
                           );

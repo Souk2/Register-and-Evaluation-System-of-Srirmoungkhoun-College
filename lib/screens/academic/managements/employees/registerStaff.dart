@@ -10,39 +10,25 @@ import 'package:quickalert/quickalert.dart';
 import 'package:registration_evaluation_app/screens/academic/academicScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/payments/editPaymentPage.dart';
 import 'package:registration_evaluation_app/screens/academic/registation/New/newStdPay.dart';
+import 'package:registration_evaluation_app/services/EmployeesService.dart';
 import 'package:registration_evaluation_app/services/RegistrationService.dart';
 
-class NewStudent extends StatefulWidget {
-  const NewStudent({super.key});
+class RegisterStaff extends StatefulWidget {
+  const RegisterStaff({super.key});
 
   @override
-  State<NewStudent> createState() => _NewStudentState();
+  State<RegisterStaff> createState() => _RegisterStaffState();
 }
 
 List<String> opt = ["", "Male", "Famale"];
 
-class _NewStudentState extends State<NewStudent> {
+class _RegisterStaffState extends State<RegisterStaff> {
   final _formKey = GlobalKey<FormState>();
   String currentOpt = opt[0];
   TextEditingController txtdob = TextEditingController();
-  String age = "";
 
   File? _selectedImage; //Upload Images
   final picker = ImagePicker();
-
-  //ໃຊ້ເພື່່ອບອກສະຖານະການລົງທະບຽນວ່າຮຽນແລ້ວ
-  int regisID = 1;
-
-  //ສົກຮຽນ
-  List<dynamic> yearData = []; // use from dropdownbutton
-  int? _valueYear; // use from dropdownbutton
-
-  //ທີ່ຢູ່ເກີດ
-  List<dynamic> provincesBData = [];
-  List<dynamic> filteredDistrictsBData = [];
-  List<dynamic> districtsBData = [];
-  int? _valueProB;
-  int? _valueDisB;
 
   //ທີ່ຢູ່ປັດຈຸບັນ
   List<dynamic> provincesNData = [];
@@ -51,29 +37,13 @@ class _NewStudentState extends State<NewStudent> {
   int? _valueProN;
   int? _valueDisN;
 
-  //ສາຂາຮຽນ
-  List<dynamic> majorData = [];
-  int? _valueMajor;
-
-  //ຫ້ອງຮຽນ
-  List<dynamic> classData = [];
-  int? _valueClass;
-
-  //ພາກຮຽນ
-  List<dynamic> semData = [];
-  int? _valueSem;
+  //ເລືອກຕຳແໜ່ງພະນັກງານ
+  List<dynamic> roleData = [];
+  int? _valueRole;
 
   bool _isLoading = false;
   String? _errorMessage;
 
-  // ตัวแปรสำหรับเก็บค่าที่เลือกจาก DropdownButton ໃຊ້ເພື່ອເລືອກຄ່າເທີມ
-  String? _selectedTerm;
-  // Controller สำหรับ TextFormField
-  final TextEditingController _amountController = TextEditingController();
-  final Map<String, String> _termAmounts = {
-    'ຈ່າຍທັ້ງ 2 ເທີມ': '2,500,000.00 ກີບ', // ตัวอย่างจำนวนเงิน
-    'ຈ່າຍເຄິ່ງເທີມ': '1,000,000.00 ກີບ',
-  };
   @override
   void initState() {
     super.initState();
@@ -93,102 +63,43 @@ class _NewStudentState extends State<NewStudent> {
     try {
       // 1. สร้าง List ของ Future สำหรับแต่ละ API call
       List<Future<http.Response>> futures = [
-        http.get(Uri.parse("$baseUrl/yearstd")),
         http.get(Uri.parse("$baseUrl/province")),
         http.get(Uri.parse("$baseUrl/district")),
-        http.get(Uri.parse("$baseUrl/major")),
-        http.get(Uri.parse("$baseUrl/class")),
-        http.get(Uri.parse("$baseUrl/sem")),
-        http.get(Uri.parse("$baseUrl/payS")),
-        http.get(Uri.parse("$baseUrl/districtofb")),
+        http.get(Uri.parse("$baseUrl/role")),
         // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
       ];
 
       // 2. ใช้ Future.wait เพื่อรอให้ทุก API call เสร็จสิ้นพร้อมกัน
       List<http.Response> responses = await Future.wait(futures);
 
-      // 3. ตรวจสอบและประมวลผลข้อมูลจากแต่ละ API
-      if (responses[0].statusCode == 200) {
-        yearData = jsonDecode(responses[0].body);
-        print('Provinces data loaded: ${yearData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load provinces data: ${responses[0].statusCode}');
-      }
-
-      //ທີ່ຢູ່ເກີດ
-      if (responses[1].statusCode == 200) {
-        provincesBData = jsonDecode(responses[1].body);
-        print('Districts data loaded: ${provincesBData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[1].statusCode}');
-      }
-
-      if (responses[7].statusCode == 200) {
-        districtsBData = jsonDecode(responses[7].body);
-        print('Districts data loaded: ${districtsBData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[7].statusCode}');
-      }
-
       //ທີ່ຢູ່ປັດຈຸບັນ
-      if (responses[1].statusCode == 200) {
-        provincesNData = jsonDecode(responses[1].body);
+      if (responses[0].statusCode == 200) {
+        provincesNData = jsonDecode(responses[0].body);
         print('Districts data loaded: ${provincesNData.length} items');
+      } else {
+        throw Exception(
+            'Failed to load districts data: ${responses[0].statusCode}');
+      }
+
+      if (responses[1].statusCode == 200) {
+        districtsNData = jsonDecode(responses[1].body);
+        print('Districts data loaded: ${districtsNData.length} items');
       } else {
         throw Exception(
             'Failed to load districts data: ${responses[1].statusCode}');
       }
 
       if (responses[2].statusCode == 200) {
-        districtsNData = jsonDecode(responses[2].body);
-        print('Districts data loaded: ${districtsNData.length} items');
+        roleData = jsonDecode(responses[2].body);
+        print('Districts data loaded: ${roleData.length} items');
       } else {
         throw Exception(
             'Failed to load districts data: ${responses[2].statusCode}');
       }
 
-      //ສາຂາຮຽນ
-      if (responses[3].statusCode == 200) {
-        majorData = jsonDecode(responses[3].body);
-        print('Districts data loaded: ${majorData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[3].statusCode}');
-      }
-
-      //ຫ້ອງຮຽນ
-      if (responses[4].statusCode == 200) {
-        classData = jsonDecode(responses[4].body);
-        print('Districts data loaded: ${classData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[4].statusCode}');
-      }
-
-      //ພາກຮຽນ
-      if (responses[5].statusCode == 200) {
-        semData = jsonDecode(responses[5].body);
-        print('Districts data loaded: ${semData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[5].statusCode}');
-      }
-
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
       setState(() {
         _isLoading = false;
-        //   if (provincesBData.isNotEmpty) {
-        //   _valueProB = provincesBData.first["pid"]; // หรือตั้งค่าเริ่มต้นที่คุณต้องการ
-        //   filteredDistrictsBData = districtsBData
-        //       .where((district) => district["pid"] == _valueProB)
-        //       .toList();
-        // }
-        // หากต้องการให้มีค่าเริ่มต้นที่เลือกไว้
-        // _selectedProvinceValue = provincesBData.isNotEmpty ? provincesBData.first["pid"] : null;
-        // _selectedDistrictValue = districtsBData.isNotEmpty ? districtsBData.first["did"] : null;
       });
     } catch (error) {
       setState(() {
@@ -199,17 +110,12 @@ class _NewStudentState extends State<NewStudent> {
     }
   }
 
-  final TextEditingController _stdID = TextEditingController();
-  final TextEditingController _name = TextEditingController();
-  final TextEditingController _surname = TextEditingController();
-  final TextEditingController _villageOB = TextEditingController();
+  final TextEditingController _empID = TextEditingController();
+  final TextEditingController _empName = TextEditingController();
+  final TextEditingController _empSurname = TextEditingController();
   final TextEditingController _villageNow = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-
-  int _statusID = 1;
-  int _yearStudy = 1;
-  int _valuePayS = 3;
 
   String formatEmailForDatabase(String input) {
     // Trim spaces and ensure it's in lower case for consistency
@@ -233,15 +139,9 @@ class _NewStudentState extends State<NewStudent> {
     return input.replaceAll(RegExp(r'\s|-'), '');
   }
 
-  Future<void> _submitNewStudent() async {
+  Future<void> _submitNewStaff() async {
     if (_formKey.currentState!.validate()) {
-      if (_valueYear == null ||
-          _valueDisN == null ||
-          _valueDisB == null ||
-          _valueMajor == null ||
-          _valueClass == null ||
-          _valueSem == null ||
-          _valueYear == null) {
+      if (_valueDisN == null || _valueRole == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -256,26 +156,17 @@ class _NewStudentState extends State<NewStudent> {
         return; // Stop submission if no province is selected
       }
 
-      bool success = await Registrationservice.addStudent(
-        _stdID.text,
-        _name.text,
-        _surname.text,
+      bool success = await Employeesservice.addEmployees(
+        _empID.text,
+        _empName.text,
+        _empSurname.text,
         txtdob.text,
         currentOpt,
         _villageNow.text,
         _valueDisN!,
-        _villageOB.text,
-        _valueDisB!,
         _phoneController.text,
         _emailController.text,
-        _yearStudy,
-        _valueMajor!,
-        _valueClass!,
-        _valueSem!,
-        _valueYear!,
-        _valuePayS,
-        _statusID,
-        regisID,
+        _valueRole!,
         _selectedImage, // 👈 รูปภาพที่ผู้ใช้เลือก
       );
       if (success) {
@@ -290,7 +181,10 @@ class _NewStudentState extends State<NewStudent> {
             backgroundColor: Colors.green,
           ),
         );
-        ShowPaymentPage();
+        Navigator.of(context).pop();
+
+        Navigator.of(context).pop();
+        showAlert();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -320,92 +214,6 @@ class _NewStudentState extends State<NewStudent> {
       ),
       confirmBtnColor: Colors.green,
       confirmBtnText: "ຕົກລົງ",
-    );
-  }
-
-  void ShowPaymentPage() async {
-    print("Confirm");
-    if (!mounted) {
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text(
-            'ເຂົ້າສູ່ໜ້າຊຳລະເງິນ',
-            style: TextStyle(
-              fontFamily: 'Phetsarath',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'ທ່ານຈະເຂົ້າສູ່ໜ້າຊຳລະເງິນບໍ່?',
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'Phetsarath',
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.orange,
-                minimumSize: Size(
-                  80,
-                  50,
-                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-
-                Navigator.of(dialogContext).pop();
-                showAlert();
-              },
-              child: Text(
-                'ຍົກເລີກ',
-                style: TextStyle(
-                  fontFamily: 'Phetsarath',
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: Size(
-                  80,
-                  50,
-                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => NewStdPay(
-                            stdID: _stdID.text,
-                            stdName: _name.text,
-                            stdSurname: _surname.text)));
-              },
-              child: Text(
-                'ຕົກລົງ',
-                style: TextStyle(
-                  fontFamily: 'Phetsarath',
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -470,13 +278,7 @@ class _NewStudentState extends State<NewStudent> {
                 ),
               ),
               onPressed: () {
-                if (_valueYear == null ||
-                    _valueDisN == null ||
-                    _valueDisB == null ||
-                    _valueMajor == null ||
-                    _valueClass == null ||
-                    _valueSem == null ||
-                    _valueYear == null) {
+                if (_valueDisN == null || _valueRole == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -491,7 +293,7 @@ class _NewStudentState extends State<NewStudent> {
                   Navigator.of(context).pop();
                   return; // Stop submission if no province is selected
                 } else {
-                  _submitNewStudent();
+                  _submitNewStaff();
                 }
               },
               child: Text(
@@ -522,17 +324,6 @@ class _NewStudentState extends State<NewStudent> {
           if (date1 != null) {
             //txtdob.text = date1.toString().split("")[0];
             txtdob.text = DateFormat("yyyy-MM-dd").format(date1);
-
-            int d1 = int.parse(DateFormat("dd").format(date1));
-
-            int m1 = int.parse(DateFormat("dd").format(date1));
-
-            int y1 = int.parse(DateFormat("dd").format(date1));
-
-            int ynow = int.parse(DateFormat("yy").format(DateTime.now()));
-            int _age = DateTime.timestamp().year - date1.year;
-            age = _age.toString();
-            print("Age : $age ປີ");
           } else {
             txtdob.text = DateFormat("dd/MM/yyyy").format(
               DateTime.now(),
@@ -557,13 +348,11 @@ class _NewStudentState extends State<NewStudent> {
 
   @override
   void dispose() {
-    _stdID.dispose();
-    _name.dispose();
-    _surname.dispose();
-    _villageOB.dispose();
+    _empID.dispose();
+    _empName.dispose();
+    _empSurname.dispose();
     _villageNow.dispose();
     _phoneController.dispose();
-    _amountController.dispose();
     _emailController.dispose();
     txtdob.dispose();
     super.dispose();
@@ -578,7 +367,7 @@ class _NewStudentState extends State<NewStudent> {
         ),
         backgroundColor: Colors.blueAccent,
         title: Text(
-          "ລົງທະບຽນນັກສຶກສາໃໝ່",
+          "ລົງທະບຽນພະນັກງານໃໝ່",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -593,54 +382,11 @@ class _NewStudentState extends State<NewStudent> {
             key: _formKey,
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Spacer(),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          underline: SizedBox.shrink(),
-                          borderRadius: BorderRadius.circular(20),
-                          isExpanded: true,
-                          items: yearData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["yearOf"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["yearS_id"],
-                            );
-                          }).toList(),
-                          value: _valueYear,
-                          onChanged: (v) {
-                            setState(() {
-                              _valueYear = v as int;
-                            });
-                          },
-                          hint: Text(
-                            "ສົກຮຽນ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 SizedBox(
                   height: 20,
                 ),
                 Text(
-                  "ປ້ອນຂໍ້ມູນນັກສຶກສາ",
+                  "ປ້ອນຂໍ້ມູນພະນັກງານ",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -667,12 +413,12 @@ class _NewStudentState extends State<NewStudent> {
                   height: 20,
                 ),
                 TextFormField(
-                  controller: _stdID,
+                  controller: _empID,
                   style: TextStyle(
                     fontFamily: 'Phetsarath',
                   ),
                   decoration: InputDecoration(
-                    labelText: 'ລະຫັດນັກສືກສາ',
+                    labelText: 'ລະຫັດພະນັກງານ',
                     labelStyle: TextStyle(
                       fontFamily: 'Phetsarath',
                     ),
@@ -682,7 +428,7 @@ class _NewStudentState extends State<NewStudent> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'ກະລຸນາປ້ອນລະຫັດນັກສືກສາ';
+                      return 'ກະລຸນາປ້ອນລະຫັດນັກພະນັກງານ';
                     }
                     return null;
                   },
@@ -694,7 +440,7 @@ class _NewStudentState extends State<NewStudent> {
                   children: [
                     Expanded(
                       child: TextFormField(
-                        controller: _name,
+                        controller: _empName,
                         style: TextStyle(
                           fontFamily: 'Phetsarath',
                         ),
@@ -709,7 +455,7 @@ class _NewStudentState extends State<NewStudent> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'ກະລຸນາປ້ອນຊື່ນັກສືກສາ';
+                            return 'ກະລຸນາປ້ອນຊື່ພະນັກງານ';
                           }
                           return null;
                         },
@@ -720,7 +466,7 @@ class _NewStudentState extends State<NewStudent> {
                     ),
                     Expanded(
                       child: TextFormField(
-                        controller: _surname,
+                        controller: _empSurname,
                         style: TextStyle(
                           fontFamily: 'Phetsarath',
                         ),
@@ -867,132 +613,8 @@ class _NewStudentState extends State<NewStudent> {
                 SizedBox(
                   height: 10,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          underline: SizedBox.shrink(),
-                          borderRadius: BorderRadius.circular(20),
-                          isExpanded: true,
-                          items: provincesBData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["pname"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["pid"],
-                            );
-                          }).toList(),
-                          value: _valueProB,
-                          onChanged: (v) {
-                            setState(() {
-                              _valueProB = v as int;
-                              // กรองข้อมูลอำเภอตามแขวงที่เลือก
-                              filteredDistrictsBData = districtsBData
-                                  .where((districtofb) =>
-                                      districtofb["pid"] == _valueProB)
-                                  .toList();
-                              // รีเซ็ตค่าอำเภอที่เลือกเมื่อเปลี่ยนแขวง
-                              _valueDisB =
-                                  null; // หรือจะให้เลือกค่าแรกของอำเภอที่กรองได้ก็ได้
-                            });
-                          },
-                          hint: Text(
-                            "ແຂວງເກີດ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          borderRadius: BorderRadius.circular(20),
-                          underline: SizedBox.shrink(),
-                          isExpanded: true,
-                          items: filteredDistrictsBData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["dsBName"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["dsBid"],
-                            );
-                          }).toList(),
-                          value: _valueDisB,
-                          onChanged: (v) {
-                            setState(() {
-                              _valueDisB = v as int;
-                            });
-                          },
-                          hint: Text(
-                            "ເມືອງເກີດ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 SizedBox(
                   height: 10,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        child: TextFormField(
-                          controller: _villageOB,
-                          style: TextStyle(
-                            fontFamily: 'Phetsarath',
-                          ),
-                          decoration: InputDecoration(
-                            labelText: 'ບ້ານເກີດ',
-                            labelStyle: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'ກະລຸນາປ້ອນຊື່ບ້ານເກີດງ';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Spacer()
-                  ],
                 ),
                 SizedBox(
                   height: 10,
@@ -1111,7 +733,7 @@ class _NewStudentState extends State<NewStudent> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'ກະລຸນາປ້ອນບ້ານຢູ່ປັດຈຸບັນ';
+                              return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
                             }
                             return null;
                           },
@@ -1157,7 +779,7 @@ class _NewStudentState extends State<NewStudent> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'ກະລຸນາປ້ອນອີເມວ';
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
                           }
                           return null;
                         },
@@ -1190,7 +812,7 @@ class _NewStudentState extends State<NewStudent> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'ກະລຸນາປ້ອນເບີໂທລະສັບ';
+                            return 'ກະລຸນາປ້ອນຊື່ເມືອງ';
                           }
                           return null;
                         },
@@ -1202,7 +824,7 @@ class _NewStudentState extends State<NewStudent> {
                   height: 20,
                 ),
                 Text(
-                  "ສາຂາຮຽນ",
+                  "ເລືອກຕຳແໜ່ງພະນັກງານ",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -1222,127 +844,30 @@ class _NewStudentState extends State<NewStudent> {
                     underline: SizedBox.shrink(),
                     isExpanded: true,
                     borderRadius: BorderRadius.circular(20),
-                    items: majorData.map((e) {
+                    items: roleData.map((e) {
                       return DropdownMenuItem(
                         child: Text(
-                          e["m_name"],
+                          e["rolename"],
                           style: TextStyle(
                             fontFamily: 'Phetsarath',
                           ),
                         ),
-                        value: e["mid"],
+                        value: e["roleID"],
                       );
                     }).toList(),
-                    value: _valueMajor,
+                    value: _valueRole,
                     onChanged: (v) {
                       setState(() {
-                        _valueMajor = v as int;
+                        _valueRole = v as int;
                       });
                     },
                     hint: Text(
-                      "ເລືອກສາຂາຮຽນ",
+                      "ເລືອກຕຳແໜ່ງ",
                       style: TextStyle(
                         fontFamily: 'Phetsarath',
                       ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "ຫ້ອງຮຽນ ແລະ ພາກຮຽນ",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    fontFamily: 'Phetsarath',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          underline: SizedBox.shrink(),
-                          borderRadius: BorderRadius.circular(20),
-                          isExpanded: true,
-                          items: classData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["classroom"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["classID"],
-                            );
-                          }).toList(),
-                          value: _valueClass,
-                          onChanged: (v) {
-                            setState(() {
-                              _valueClass = v as int;
-                            });
-                          },
-                          hint: Text(
-                            "ເລືອກຫ້ອງຮຽນ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.black, width: 1), // Border
-                        ),
-                        child: DropdownButton(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          borderRadius: BorderRadius.circular(20),
-                          underline: SizedBox.shrink(),
-                          isExpanded: true,
-                          items: semData.map((e) {
-                            return DropdownMenuItem(
-                              child: Text(
-                                e["semName"],
-                                style: TextStyle(
-                                  fontFamily: 'Phetsarath',
-                                ),
-                              ),
-                              value: e["semID"],
-                            );
-                          }).toList(),
-                          value: _valueSem,
-                          onChanged: (v) {
-                            setState(() {
-                              _valueSem = v as int;
-                            });
-                          },
-                          hint: Text(
-                            "ເລືອກພາກຮຽນ",
-                            style: TextStyle(
-                              fontFamily: 'Phetsarath',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 SizedBox(
                   height: 30,

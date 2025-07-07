@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,8 @@ class EditOldStudentRe extends StatefulWidget {
   final int yearS_id;
   final int statusID;
   final int sYearID;
+
+  final String image_url;
   const EditOldStudentRe({
     super.key,
     required this.stdID,
@@ -47,6 +50,7 @@ class EditOldStudentRe extends StatefulWidget {
     required this.yearS_id,
     required this.statusID,
     required this.sYearID,
+    required this.image_url,
   });
 
   @override
@@ -56,6 +60,8 @@ class EditOldStudentRe extends StatefulWidget {
 class _EditOldStudentReState extends State<EditOldStudentRe> {
   final _formKey = GlobalKey<FormState>();
 
+  File? _selectedImage; //Upload Images
+  String? _imageUrl; // สำหรับ URL ที่รับมาจาก backend
   //ໃຊ້ເພື່່ອບອກສະຖານະການລົງທະບຽນວ່າຮຽນແລ້ວ
   int regisID = 1;
 
@@ -74,12 +80,21 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
   List<String> paidTerms = [];
   List<String> availableTerms = ['1', '2'];
 
+  bool isFullyPaid = false;
+  String? lastReceiptNumber;
+  String? receiptStatus; // เช่น "จ่ายแค่ครึ่งเทอม"
+
+  // จ่ายบางเทอม (ครึ่งเทอม) to disable checkBox money
+  bool isPartialPaid = false;
+
   // ตัวแปรสำหรับเก็บค่าที่เลือกจาก DropdownButton ໃຊ້ເພື່ອເລືອກຄ່າເທີມ
   Map<String, dynamic>? selectedStudent;
   String? selectedTerm;
+
   // เพิ่มไว้ด้านบนใน State class
   bool payFullYear = false;
   final amountPaidController = TextEditingController(); //ເກັບຈຳນວນເງິນ
+
   // MoneyFieldPage(controller: amountPaidController),
   Map<String, dynamic>? paymentInfo; // จากตาราง payment
   int? studentSyearID; // ดึงจาก DB หรือตัวแปรที่มีอยู่แล้ว
@@ -95,13 +110,18 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
     _name.text = widget.stdName;
     _surname.text = widget.stdSurname;
 
+    _imageUrl = widget.image_url;
+
     // ✅ ดึงข้อมูลนักเรียนทันทีเมื่อเปิดหน้า
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchStudentInfo();
+      _fetchLastReceipt();
     });
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   // ພາກສ່ວນໃນການດຶງຂໍ້ມູນ DropDown ຕ່າງໆ ຂຶິນມາສະແດງ
   Future<void> _fetchData() async {
@@ -223,11 +243,33 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
       final List<dynamic> terms = jsonDecode(res.body);
       paidTerms = terms.map((t) => t.toString()).toList();
 
-      // กรองเฉพาะ term ที่ยังไม่จ่าย
-      availableTerms =
-          ['1', '2'].where((term) => !paidTerms.contains(term)).toList();
+      // เงื่อนไข:
+      isFullyPaid = paidTerms.contains('1') && paidTerms.contains('2');
+      isPartialPaid =
+          paidTerms.length == 1; // จ่ายแค่เทอมเดียว to disable checkBox money
+
+      // กรอง term ที่เหลือ
+      availableTerms = ['1', '2'].where((t) => !paidTerms.contains(t)).toList();
       if (!availableTerms.contains(selectedTerm)) selectedTerm = null;
       // setState(() {});
+    }
+  }
+
+  //ฟังก์ชันโหลดเลขใบเสร็จ
+  Future<void> _fetchLastReceipt() async {
+    final stdID = _stdID.text.trim();
+    final res = await http
+        .get(Uri.parse("$baseUrl/student-payment/last-receipt/$stdID"));
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      lastReceiptNumber = data['receipt_number'];
+      receiptStatus = data['status']; // ✅ เช่น "จ่ายแค่ครึ่งเทอม"
+      setState(() {});
+    } else {
+      lastReceiptNumber = null;
+      receiptStatus = null;
+      setState(() {});
     }
   }
 
@@ -476,7 +518,11 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
 
   @override
   void dispose() {
+    _stdID.dispose();
+    _name.dispose();
+    _surname.dispose();
     _amountController.dispose();
+    amountPaidController.dispose();
     super.dispose();
   }
 
@@ -513,6 +559,23 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     fontFamily: 'Phetsarath',
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                GestureDetector(
+                  child: CircleAvatar(
+                    radius: 90,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: _selectedImage != null
+                        ? FileImage(_selectedImage!)
+                        : (_imageUrl != null && _imageUrl!.isNotEmpty
+                            ? NetworkImage(_imageUrl!)
+                            : null),
+                    child: _selectedImage == null && widget.image_url.isEmpty
+                        ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                        : null,
                   ),
                 ),
                 SizedBox(
@@ -602,6 +665,7 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                           underline: SizedBox.shrink(),
+                          borderRadius: BorderRadius.circular(20),
                           isExpanded: true,
                           items: classData.map((e) {
                             return DropdownMenuItem(
@@ -643,6 +707,7 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
+                          borderRadius: BorderRadius.circular(20),
                           items: semData.map((e) {
                             return DropdownMenuItem(
                               child: Text(
@@ -697,6 +762,7 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                   ),
                   child: DropdownButton<String>(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    borderRadius: BorderRadius.circular(20),
                     underline: SizedBox.shrink(),
                     isExpanded: true,
                     value: selectedTerm,
@@ -711,12 +777,14 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                             style: TextStyle(fontFamily: 'Phetsarath')),
                       );
                     }).toList(),
-                    onChanged: (val) {
-                      selectedTerm = val;
-                      payFullYear = false;
-                      _updateAmountPaid();
-                      setState(() {});
-                    },
+                    onChanged: payFullYear
+                        ? null // 🔒 ถ้าเช็คจ่ายทั้งปี จะ disable dropdown
+                        : (val) {
+                            selectedTerm = val;
+                            payFullYear = false;
+                            _updateAmountPaid();
+                            setState(() {});
+                          },
                   ),
                 ),
                 SizedBox(
@@ -726,12 +794,14 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                 // ☑️ จ่ายทั้งปี
                 CheckboxListTile(
                   value: payFullYear,
-                  onChanged: (val) {
-                    payFullYear = val!;
-                    selectedTerm = null;
-                    _updateAmountPaid();
-                    setState(() {});
-                  },
+                  onChanged: (isFullyPaid || isPartialPaid)
+                      ? null // ✅ ปิดการใช้งาน checkbox ถ้าจ่ายครบ
+                      : (val) {
+                          payFullYear = val!;
+                          selectedTerm = null;
+                          _updateAmountPaid();
+                          setState(() {});
+                        },
                   title: Text(
                     "ຈ່າຍທັ້ງປີການສຶກສາ (2 ເທີມ)",
                     style: TextStyle(
@@ -739,6 +809,34 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
                     ),
                   ),
                 ),
+
+                // ຖ້າຈ່າຍພຽງເຄິ່ງເທີມ ໃຫ້ສະແດງໃບບິນພ້ອມບອກສະຖານະ ຈ່າຍເຄິ່ງເທີມ / ຖ້າຈ່າຍຄົບ ໃຫ້ສະແດງໃບບິນພ້ອມບອກສະຖານະ ຈ່າຍຄົບ
+                if (lastReceiptNumber != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "🧾 ໃບບິນ: $lastReceiptNumber",
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontFamily: 'Phetsarath',
+                        ),
+                      ),
+                      if (receiptStatus != null)
+                        Text(
+                          "📌 ສະຖານະ : $receiptStatus",
+                          style: TextStyle(
+                            color: receiptStatus == "ຈ່າຍເຄິ່ງເທີມ"
+                                ? Colors.orange
+                                : Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                    ],
+                  ),
                 SizedBox(
                   height: 10,
                 ),

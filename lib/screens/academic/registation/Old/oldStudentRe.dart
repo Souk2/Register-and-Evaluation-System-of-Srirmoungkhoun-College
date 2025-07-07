@@ -47,7 +47,7 @@ class _OldStudentReState extends State<OldStudentRe> {
   void fetchSearchStudents({String? searchQuery}) async {
     try {
       final fetchStudents = searchQuery == null || searchQuery.isEmpty
-          ? await Studentservice.getStudents()
+          ? await Studentservice.getStudentsAll()
           : await Studentservice.searchStudents(searchQuery);
       print(searchQuery);
       setState(() {
@@ -69,7 +69,9 @@ class _OldStudentReState extends State<OldStudentRe> {
     }
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   Future<void> _fetchAllDropdownData() async {
     setState(() {
@@ -179,6 +181,12 @@ class _OldStudentReState extends State<OldStudentRe> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -226,6 +234,9 @@ class _OldStudentReState extends State<OldStudentRe> {
             margin: EdgeInsets.all(10),
             child: TextField(
               controller: _searchController,
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
               decoration: InputDecoration(
                 hintText: 'ຄົ້ນຫາຊື່...',
                 hintStyle: TextStyle(
@@ -261,6 +272,7 @@ class _OldStudentReState extends State<OldStudentRe> {
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(20),
                         isExpanded: true,
                         items: studyyearData.map((e) {
                           return DropdownMenuItem(
@@ -301,6 +313,7 @@ class _OldStudentReState extends State<OldStudentRe> {
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(20),
                         isExpanded: true,
                         items: statuSData.map((e) {
                           return DropdownMenuItem(
@@ -341,6 +354,7 @@ class _OldStudentReState extends State<OldStudentRe> {
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                         underline: SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(20),
                         isExpanded: true,
                         items: yearData.map((e) {
                           return DropdownMenuItem(
@@ -430,7 +444,7 @@ class _OldStudentReState extends State<OldStudentRe> {
                     : filteredStudents.isEmpty
                         ? Center(
                             child: Text(
-                              "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                              "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
                               style: TextStyle(
                                 fontFamily: 'Phetsarath',
                               ),
@@ -458,6 +472,7 @@ class _OldStudentReState extends State<OldStudentRe> {
                                           builder: (context) =>
                                               EditOldStudentRe(
                                             stdID: student['stdID'],
+                                            image_url: student['image_url'],
                                             stdName: student['stdName'],
                                             stdSurname: student['stdSurname'],
                                             dob: student['dob'],
@@ -491,6 +506,29 @@ class _OldStudentReState extends State<OldStudentRe> {
                                         Column(
                                           // crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            if (student['image_url'] != null)
+                                              Center(
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    student['image_url'],
+                                                    width: 120,
+                                                    height: 120,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        Icon(Icons.error),
+                                                  ),
+                                                ),
+                                              ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
                                             Text(
                                               '${student['stdID']}',
                                               style: TextStyle(
@@ -629,6 +667,8 @@ class _OldStudentReState extends State<OldStudentRe> {
                                                                 EditOldStudentRe(
                                                               stdID: student[
                                                                   'stdID'],
+                                                              image_url: student[
+                                                                  'image_url'],
                                                               stdName: student[
                                                                   'stdName'],
                                                               stdSurname: student[

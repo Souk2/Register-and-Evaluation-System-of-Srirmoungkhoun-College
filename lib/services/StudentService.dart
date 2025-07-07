@@ -2,22 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Studentservice {
-  static const String baseUrl = "http://192.168.0.104:3000";
-  // static const String baseUrl = "http://192.168.61.95:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
   // Function get
 
   static Future<List<dynamic>> getStudentsAll() async {
-    final response = await http.get(Uri.parse("$baseUrl/std"));
-    print("API response: ${response.body}");
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Failed to load unit: ${response.statusCode}");
-    }
-  }
-
-  static Future<List<dynamic>> getStudents() async {
-    final response = await http.get(Uri.parse("$baseUrl/std/select"));
+    final response = await http.get(Uri.parse("$baseUrl/std/all"));
     print("API response: ${response.body}");
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -28,7 +18,7 @@ class Studentservice {
 
   static Future<List<dynamic>> searchStudents(String stdName) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/std/search/payment?stdName=$stdName"),
+      Uri.parse("$baseUrl/std/search?stdName=$stdName"),
     );
 
     if (response.statusCode == 200) {

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
@@ -12,6 +14,7 @@ import 'package:registration_evaluation_app/services/StudentService.dart';
 
 class EditStudentPage extends StatefulWidget {
   final String stdID;
+  final String image_url;
   final String stdName;
   final String stdSurname;
   final String dob;
@@ -31,6 +34,7 @@ class EditStudentPage extends StatefulWidget {
   const EditStudentPage({
     super.key,
     required this.stdID,
+    required this.image_url,
     required this.stdName,
     required this.stdSurname,
     required this.dob,
@@ -59,6 +63,10 @@ class _EditStudentPageState extends State<EditStudentPage> {
   final _formKey = GlobalKey<FormState>();
   String currentOptEdit = opt[0];
   TextEditingController txtdob = TextEditingController();
+
+  File? _selectedImage; //Upload Images
+  final picker = ImagePicker();
+  String? _imageUrl; // สำหรับ URL ที่รับมาจาก backend
 
   //ສົກຮຽນ
   List<dynamic> yearData = []; // use from dropdownbutton
@@ -113,7 +121,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
   void initState() {
     super.initState();
     // _fetchAllDropdownData(); // Call the data fetching function when the widget is created
-    _fetchData();
+    _fetchDataAll();
     _stdID.text = widget.stdID;
     _name.text = widget.stdName;
     _surname.text = widget.stdSurname;
@@ -123,12 +131,16 @@ class _EditStudentPageState extends State<EditStudentPage> {
     _villageOB.text = widget.villageOfB;
     _phoneController.text = widget.phoneNum;
     _emailController.text = widget.email;
+
+    _imageUrl = widget.image_url;
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   // ພາກສ່ວນໃນການດຶງຂໍ້ມູນ DropDown ຕ່າງໆ ຂຶິນມາສະແດງ
-  Future<void> _fetchData() async {
+  Future<void> _fetchDataAll() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -224,112 +236,6 @@ class _EditStudentPageState extends State<EditStudentPage> {
     }
   }
 
-  Future<void> _fetchAllDropdownData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // 1. สร้าง List ของ Future สำหรับแต่ละ API call
-      List<Future<http.Response>> futures = [
-        http.get(Uri.parse("$baseUrl/yearstd")),
-        http.get(Uri.parse("$baseUrl/province")),
-        http.get(Uri.parse("$baseUrl/district")),
-        http.get(Uri.parse("$baseUrl/major")),
-        http.get(Uri.parse("$baseUrl/class")),
-        http.get(Uri.parse("$baseUrl/sem")),
-        http.get(Uri.parse("$baseUrl/payS")),
-        http.get(Uri.parse("$baseUrl/districtofb")),
-        // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
-      ];
-
-      // 2. ใช้ Future.wait เพื่อรอให้ทุก API call เสร็จสิ้นพร้อมกัน
-      List<http.Response> responses = await Future.wait(futures);
-
-      // 3. ตรวจสอบและประมวลผลข้อมูลจากแต่ละ API
-      if (responses[0].statusCode == 200) {
-        yearData = jsonDecode(responses[0].body);
-        print('Provinces data loaded: ${yearData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load provinces data: ${responses[0].statusCode}');
-      }
-
-      //ທີ່ຢູ່ເກີດ
-      if (responses[1].statusCode == 200) {
-        provincesBData = jsonDecode(responses[1].body);
-        print('Districts data loaded: ${provincesBData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[1].statusCode}');
-      }
-
-      if (responses[7].statusCode == 200) {
-        districtsBData = jsonDecode(responses[7].body);
-        print('Districts data loaded: ${districtsBData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[7].statusCode}');
-      }
-
-      //ທີ່ຢູ່ປັດຈຸບັນ
-      if (responses[1].statusCode == 200) {
-        provincesNData = jsonDecode(responses[1].body);
-        print('Districts data loaded: ${provincesNData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[1].statusCode}');
-      }
-
-      if (responses[2].statusCode == 200) {
-        districtsNData = jsonDecode(responses[2].body);
-        print('Districts data loaded: ${districtsNData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[2].statusCode}');
-      }
-
-      //ສາຂາຮຽນ
-      if (responses[3].statusCode == 200) {
-        majorData = jsonDecode(responses[3].body);
-        print('Districts data loaded: ${majorData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[3].statusCode}');
-      }
-
-      //ຫ້ອງຮຽນ
-      if (responses[4].statusCode == 200) {
-        classData = jsonDecode(responses[4].body);
-        print('Districts data loaded: ${classData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[4].statusCode}');
-      }
-
-      //ພາກຮຽນ
-      if (responses[5].statusCode == 200) {
-        semData = jsonDecode(responses[5].body);
-        print('Districts data loaded: ${semData.length} items');
-      } else {
-        throw Exception(
-            'Failed to load districts data: ${responses[5].statusCode}');
-      }
-
-      // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (error) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'An unexpected error occurred: $error';
-      });
-      print('Error fetching all dropdown data: $error');
-    }
-  }
-
   final TextEditingController _stdID = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _surname = TextEditingController();
@@ -414,8 +320,11 @@ class _EditStudentPageState extends State<EditStudentPage> {
             backgroundColor: Colors.green,
           ),
         );
+
+        _uploadImage(); // update Image
+
         ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
-        Navigator.of(context).pop(); // ปิด dialog
+        Navigator.of(context).pop(true); // ปิด dialog
         Navigator.of(context).pop(true); // ย้อนกลับไปหน้าก่อนหน้านี้
 
         showAlert();
@@ -435,62 +344,50 @@ class _EditStudentPageState extends State<EditStudentPage> {
     }
   }
 
-  Future<void> _submitDeleteStudent() async {
-    if (_formKey.currentState!.validate()) {
-      if (_valueYear == null ||
-          _valueDisN == null ||
-          _valueDisB == null ||
-          _valueMajor == null ||
-          _valueClass == null ||
-          _valueSem == null ||
-          _valueYear == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
-              style: TextStyle(
-                fontFamily: 'Phetsarath',
-              ),
-            ), // Please select a province
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return; // Stop submission if no province is selected
-      }
+  //ฟังก์ชันเลือกภาพ:
+  Future<void> _pickImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
-      bool success = await Studentservice.deleteStudents(
-        _stdID.text,
+  //Update Images
+  Future<void> _uploadImage() async {
+    // ถ้าเลือกรูปใหม่แล้ว อัปโหลดรูปใหม่
+    if (_selectedImage != null) {
+      final uri = Uri.parse(
+          'http://192.168.0.104:3000/uploadImg/update/${widget.stdID}');
+      final request = http.MultipartRequest('PUT', uri);
+
+      request.files.add(
+        await http.MultipartFile.fromPath('image', _selectedImage!.path),
       );
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "ແກ້ໄຂຂໍ້ມູນນັກຮຽນຖືກບັນທຶກສຳເລັດແລ້ວ",
-              style: TextStyle(
-                fontFamily: 'Phetsarath',
-              ),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-        ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
-        Navigator.of(context).pop(); // ปิด dialog
-        Navigator.of(context).pop(); // ย้อนกลับไปหน้าก่อนหน้านี้
 
-        showAlert();
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final resBody = await response.stream.bytesToString();
+        final jsonRes = json.decode(resBody);
+        final newUrl = jsonRes['imageUrl'];
+
+        if (mounted) {
+          setState(() {
+            _imageUrl = newUrl;
+            _selectedImage = null; // clear selected
+          });
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "ຂໍອະໄພ!ເກີດຂໍ້ຜິດພາດ",
-              style: TextStyle(
-                fontFamily: 'Phetsarath',
-              ),
-            ),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text("❌ Failed to upload image.")),
         );
       }
+    } else {
+      // ✅ กรณีไม่ได้เลือกรูปใหม่ → ใช้ URL เดิมไป
+      // คุณสามารถส่งค่ากลับหน้าเดิม หรือแสดงผลตามต้องการได้ที่นี่
+      Navigator.pop(context, true);
     }
   }
 
@@ -609,6 +506,65 @@ class _EditStudentPageState extends State<EditStudentPage> {
     );
   }
 
+  Future<void> _submitDeleteStudent() async {
+    if (_formKey.currentState!.validate()) {
+      if (_valueYear == null ||
+          _valueDisN == null ||
+          _valueDisB == null ||
+          _valueMajor == null ||
+          _valueClass == null ||
+          _valueSem == null ||
+          _valueYear == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ), // Please select a province
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return; // Stop submission if no province is selected
+      }
+
+      bool success = await Studentservice.deleteStudents(
+        _stdID.text,
+      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ແກ້ໄຂຂໍ້ມູນນັກຮຽນຖືກບັນທຶກສຳເລັດແລ້ວ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
+        Navigator.of(context).pop(); // ปิด dialog
+        Navigator.of(context).pop(); // ย้อนกลับไปหน้าก่อนหน้านี้
+
+        showAlert();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ຂໍອະໄພ!ເກີດຂໍ້ຜິດພາດ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void ConfirmDelete() async {
     print("ConfirmUpdate");
     if (!mounted) {
@@ -710,9 +666,13 @@ class _EditStudentPageState extends State<EditStudentPage> {
 
   @override
   void dispose() {
-    _phoneController.dispose();
-    _amountController.dispose();
+    _stdID.dispose();
+    _name.dispose();
+    _surname.dispose();
+    _villageOB.dispose();
+    _villageNow.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -784,6 +744,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: yearData.map((e) {
@@ -841,6 +802,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                           underline: SizedBox.shrink(),
+                          borderRadius: BorderRadius.circular(10),
                           isExpanded: true,
                           items: statuSData.map((e) {
                             return DropdownMenuItem(
@@ -860,7 +822,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                             });
                           },
                           hint: Text(
-                            "ສົກຮຽນ",
+                            "ສະຖານະການຮຽນ",
                             style: TextStyle(
                               fontFamily: 'Phetsarath',
                             ),
@@ -897,6 +859,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: studyyearData.map((e) {
@@ -917,7 +880,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                             });
                           },
                           hint: Text(
-                            "ສົກຮຽນ",
+                            "ສຶກສາປີທີ",
                             style: TextStyle(
                               fontFamily: 'Phetsarath',
                             ),
@@ -939,6 +902,24 @@ class _EditStudentPageState extends State<EditStudentPage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     fontFamily: 'Phetsarath',
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 90,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: _selectedImage != null
+                        ? FileImage(_selectedImage!)
+                        : (_imageUrl != null && _imageUrl!.isNotEmpty
+                            ? NetworkImage(_imageUrl!)
+                            : null),
+                    child: _selectedImage == null && widget.image_url.isEmpty
+                        ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                        : null,
                   ),
                 ),
                 SizedBox(
@@ -1150,6 +1131,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                           underline: SizedBox.shrink(),
+                          borderRadius: BorderRadius.circular(10),
                           isExpanded: true,
                           items: provincesBData.map((e) {
                             return DropdownMenuItem(
@@ -1197,6 +1179,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: filteredDistrictsBData.map((e) {
@@ -1274,6 +1257,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: provincesNData.map((e) {
@@ -1322,6 +1306,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: filteredDistrictsNData.map((e) {
@@ -1474,6 +1459,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                   ),
                   child: DropdownButton(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    borderRadius: BorderRadius.circular(10),
                     underline: SizedBox.shrink(),
                     isExpanded: true,
                     items: majorData.map((e) {
@@ -1526,6 +1512,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: classData.map((e) {
@@ -1566,6 +1553,7 @@ class _EditStudentPageState extends State<EditStudentPage> {
                         ),
                         child: DropdownButton(
                           padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          borderRadius: BorderRadius.circular(10),
                           underline: SizedBox.shrink(),
                           isExpanded: true,
                           items: semData.map((e) {

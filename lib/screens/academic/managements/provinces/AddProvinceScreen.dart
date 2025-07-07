@@ -39,6 +39,12 @@ class _AddProvinceScreenState extends State<AddProvinceScreen> {
   }
 
   @override
+  void dispose() {
+    _tittlecontroller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -63,6 +69,9 @@ class _AddProvinceScreenState extends State<AddProvinceScreen> {
             children: [
               TextFormField(
                 controller: _tittlecontroller,
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                ),
                 decoration: InputDecoration(
                   labelText: 'ຊື່ແຂວງ',
                   labelStyle: TextStyle(

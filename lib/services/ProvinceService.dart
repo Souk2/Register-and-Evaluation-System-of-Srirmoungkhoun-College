@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Provinceservice {
-  static const String baseUrl = "http://192.168.0.104:3000";
-  // static const String baseUrl = "http://192.168.61.95:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   // Function get Province
   static Future<List<dynamic>> getProvinces() async {

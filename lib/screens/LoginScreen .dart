@@ -8,6 +8,7 @@ import 'package:registration_evaluation_app/screens/academic/managements/provinc
 import 'package:registration_evaluation_app/screens/academic/academicScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/registation/New/newStudent.dart';
 import 'package:registration_evaluation_app/screens/student/StudentScreen.dart';
+import 'package:registration_evaluation_app/screens/student/footers.dart';
 import 'package:registration_evaluation_app/screens/teacher/teacherScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,50 +24,13 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool _isPhoneError = false;
   String _phoneErrorMessage = '';
-  // Future<void> loginUser() async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-
-  //   final String url = "http://192.168.0.104:3000/v1/login";
-  //   // final String url = "http://192.168.61.95:3000/v1/login";
-
-  //   try {
-  //     final response = await http.post(Uri.parse(url),
-  //         headers: {"Content-Type": "application/json"},
-  //         body: jsonEncode({
-  //           "phone": phoneController.text,
-  //           "password": passwordController.text,
-  //         }));
-  //     if (response.statusCode == 200) {
-  //       ScaffoldMessenger.of(context)
-  //           .showSnackBar(SnackBar(content: Text("ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ")));
-
-  //       /// ໃຊ້ບໍ່ໃຫ້ມີລຸກສອນຍ້ອນກັບ
-  //       Navigator.of(context).pop();
-
-  //       Navigator.push(context,
-  //           MaterialPageRoute(builder: (context) => const DistrictScreen()));
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text("ເຂົ້າສູ່ລະບົບບໍ່ສຳເລັດ ${response.body}")));
-  //     }
-  //   } catch (error) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-
-  //     ScaffoldMessenger.of(context)
-  //         .showSnackBar(SnackBar(content: Text("ເຊື່ອມຕໍ່ server ບໍ່ໄດ້")));
-  //   }
-  // }
 
   Future<void> loginUser() async {
     setState(() {
       isLoading = true;
     });
 
-    final String url = "http://192.168.0.104:3000/v1/login";
+    final String url = "http://10.34.90.133:3000/v1/login";
 
     try {
       final response = await http.post(
@@ -103,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (context) => const AcademicScreen()));
         } else if (role == 2) {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const StudentScreen()));
+              MaterialPageRoute(builder: (context) => const Footers()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -130,6 +94,13 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text("ເຊື່ອມຕໍ່ server ບໍ່ໄດ້")),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -230,31 +201,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           Text(
                             'ເຂົ້າສູ່ລະບົບ',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: "Phetsarath",
+                            ),
                           )
                         ],
                       )),
                   SizedBox(
                     height: 3,
                   ),
-                  /*Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('ລົງທະບຽນແລ້ວ ຫຼື ບໍ?'),
-                      SizedBox(
-                        width: 3,
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) =>
-                            //             const RegisterScreen()));
-                          },
-                          child: Text('ລົງທະບຽນ'))
-                    ],
-                  )*/
                 ],
               ),
             ),

@@ -7,29 +7,30 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/districts/EditDistrictScreen.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/districts/AddDistrictScreen.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/provinces/AddProvinceScreen.dart';
-import 'package:registration_evaluation_app/services/DistrictService.dart';
-import '../../../../services/ProvinceService.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/subjects/addSubjectPage.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/subjects/editSubjectPage.dart';
+import 'package:registration_evaluation_app/services/SubjectsService.dart';
 import 'package:http/http.dart' as http;
 
 // import 'package:http/http.dart' as http;
 
-class DistrictScreen extends StatefulWidget {
-  const DistrictScreen({super.key});
+class SubjectPage extends StatefulWidget {
+  const SubjectPage({super.key});
 
   @override
-  State<DistrictScreen> createState() => _DistrictScreenState();
+  State<SubjectPage> createState() => _SubjectPageState();
 }
 
-class _DistrictScreenState extends State<DistrictScreen> {
-  List<dynamic> districts = [];
+class _SubjectPageState extends State<SubjectPage> {
+  List<dynamic> subjects = [];
 
   TextEditingController _searchController = TextEditingController();
 
-  List<dynamic> provinceData = []; // use from dropdownbutton
-  int? _valueProvince; // use from dropdownbutton
+  List<dynamic> sYearData = []; // use from dropdownbutton
+  int? _valueSyear; // use from dropdownbutton
+
+  List<dynamic> majorData = []; // use from dropdownbutton
+  int? _valueMajor; // use from dropdownbutton
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -37,33 +38,33 @@ class _DistrictScreenState extends State<DistrictScreen> {
   @override
   void initState() {
     super.initState();
-    fetchDistricts();
+    fetchSubjects();
     _fetchAllDropdownData();
   }
 
-  void fetchSearchDistricts({String? searchQuery}) async {
+  void fetchSearchSubjects({String? searchQuery}) async {
     try {
-      final fetchedDistricts = searchQuery == null || searchQuery.isEmpty
-          ? await Districtservice.getDistricts()
-          : await Districtservice.searchDistricts(searchQuery);
+      final fetchedSubjects = searchQuery == null || searchQuery.isEmpty
+          ? await Subjectsservice.getSubjects()
+          : await Subjectsservice.searchSubjects(searchQuery);
       setState(() {
-        districts = fetchedDistricts;
+        subjects = fetchedSubjects;
       });
     } catch (e) {
       print("Error:$e");
     }
   }
 
-  void fetchDistricts() async {
+  void fetchSubjects() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final fetchedDistricts = await Districtservice.getDistricts();
+      final fetchedSubjects = await Subjectsservice.getSubjects();
       setState(() {
-        districts = fetchedDistricts;
+        subjects = fetchedSubjects;
       });
     } catch (e) {
       print("Error: $e");
@@ -74,9 +75,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
     });
   }
 
-  // static const String baseUrl = "http://192.168.0.104:3000";
-
-  static const String baseUrl = "http://10.34.64.243:3000";
+  static const String baseUrl = "http://192.168.0.104:3000";
 
   Future<void> _fetchAllDropdownData() async {
     setState(() {
@@ -87,7 +86,8 @@ class _DistrictScreenState extends State<DistrictScreen> {
     try {
       // 1. สร้าง List ของ Future สำหรับแต่ละ API call
       List<Future<http.Response>> futures = [
-        http.get(Uri.parse("$baseUrl/province")),
+        http.get(Uri.parse("$baseUrl/syear")),
+        http.get(Uri.parse("$baseUrl/major")),
         // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
       ];
 
@@ -97,11 +97,19 @@ class _DistrictScreenState extends State<DistrictScreen> {
       // 3. ตรวจสอบและประมวลผลข้อมูลจากแต่ละ API
 
       if (responses[0].statusCode == 200) {
-        provinceData = jsonDecode(responses[0].body);
-        print('ປີຮຽນ data loaded: ${provinceData.length} items');
+        sYearData = jsonDecode(responses[0].body);
+        print('ປີຮຽນ data loaded: ${sYearData.length} items');
       } else {
         throw Exception(
             'Failed to load provinces data: ${responses[0].statusCode}');
+      }
+
+      if (responses[1].statusCode == 200) {
+        majorData = jsonDecode(responses[1].body);
+        print('ປີຮຽນ data loaded: ${majorData.length} items');
+      } else {
+        throw Exception(
+            'Failed to load provinces data: ${responses[1].statusCode}');
       }
 
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
@@ -117,75 +125,13 @@ class _DistrictScreenState extends State<DistrictScreen> {
     }
   }
 
-  List<dynamic> get filteredDistrict {
-    return districts.where((district) {
-      final matchesProvince =
-          _valueProvince == null || district['pid'] == _valueProvince;
-      return matchesProvince;
+  List<dynamic> get filteredSubject {
+    return subjects.where((subject) {
+      final matchesSyear =
+          _valueSyear == null || subject['SyearID'] == _valueSyear;
+      final matchesMajor = _valueMajor == null || subject['mid'] == _valueMajor;
+      return matchesMajor && matchesSyear;
     }).toList();
-  }
-
-  void deleteDistricts(int dsid) async {
-    bool success = await Districtservice.deleteDistrict(dsid);
-
-    if (success) {
-      fetchDistricts();
-    }
-  }
-
-  void ConfirmDelete(int dsid) async {
-    print("confirmDelete call for ID: $dsid");
-    if (!mounted) {
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text(
-            'ຢືນຍັນການລຶບ',
-            style: TextStyle(
-              fontFamily: 'Phetsarath',
-            ),
-          ),
-          content: Text(
-            'ທ່ານແນ່ໃຈວ່າຈະລຶບຫຼືບໍ່?',
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'Phetsarath',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: Text(
-                'ຍົກເລີກ',
-                style: TextStyle(
-                  fontFamily: 'Phetsarath',
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                //showAlert();
-                deleteDistricts(dsid);
-                showAlert();
-              },
-              child: Text(
-                'ລຶບ',
-                style: TextStyle(
-                  fontFamily: 'Phetsarath',
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void showAlert() {
@@ -219,7 +165,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
         ),
         backgroundColor: Colors.blueAccent,
         title: Text(
-          'ເມືອງ',
+          'ຈັດການວິຊາຮຽນ',
           style: TextStyle(
             color: Colors.white,
             fontFamily: 'Phetsarath',
@@ -237,14 +183,14 @@ class _DistrictScreenState extends State<DistrictScreen> {
                 fontFamily: 'Phetsarath',
               ),
               decoration: InputDecoration(
-                hintText: 'ຄົ້ນຫາເມືອງ...',
+                hintText: 'ຄົ້ນຫາວິຊາ...',
                 hintStyle: TextStyle(
                   fontFamily: 'Phetsarath',
                 ),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.search),
                   onPressed: () {
-                    fetchSearchDistricts(searchQuery: _searchController.text);
+                    fetchSearchSubjects(searchQuery: _searchController.text);
                   },
                 ),
               ),
@@ -263,7 +209,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (a, b, c) => DistrictScreen(), // โหลดหน้าใหม่ทับ
+                  pageBuilder: (a, b, c) => SubjectPage(), // โหลดหน้าใหม่ทับ
                   transitionDuration: Duration.zero,
                 ),
               );
@@ -282,7 +228,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
           Row(
             children: [
               SizedBox(
-                width: 100,
+                width: 10,
               ),
               Expanded(
                 child: Container(
@@ -295,25 +241,25 @@ class _DistrictScreenState extends State<DistrictScreen> {
                     underline: SizedBox.shrink(),
                     borderRadius: BorderRadius.circular(20),
                     isExpanded: true,
-                    items: provinceData.map((e) {
+                    items: sYearData.map((e) {
                       return DropdownMenuItem(
                         child: Text(
-                          e["pname"],
+                          e["Syear"],
                           style: TextStyle(
                             fontFamily: 'Phetsarath',
                           ),
                         ),
-                        value: e["pid"],
+                        value: e["SyearID"],
                       );
                     }).toList(),
-                    value: _valueProvince,
+                    value: _valueSyear,
                     onChanged: (v) {
                       setState(() {
-                        _valueProvince = v as int;
+                        _valueSyear = v as int;
                       });
                     },
                     hint: Text(
-                      "ແຂວງ",
+                      "ປີຮຽນ",
                       style: TextStyle(
                         fontFamily: 'Phetsarath',
                       ),
@@ -322,7 +268,47 @@ class _DistrictScreenState extends State<DistrictScreen> {
                 ),
               ),
               SizedBox(
-                width: 100,
+                width: 10,
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 1), // Border
+                  ),
+                  child: DropdownButton(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    underline: SizedBox.shrink(),
+                    borderRadius: BorderRadius.circular(20),
+                    isExpanded: true,
+                    items: majorData.map((e) {
+                      return DropdownMenuItem(
+                        child: Text(
+                          e["m_name"],
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                        value: e["mid"],
+                      );
+                    }).toList(),
+                    value: _valueMajor,
+                    onChanged: (v) {
+                      setState(() {
+                        _valueMajor = v as int;
+                      });
+                    },
+                    hint: Text(
+                      "ສາຂາ",
+                      style: TextStyle(
+                        fontFamily: 'Phetsarath',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 10,
               ),
             ],
           ),
@@ -337,14 +323,14 @@ class _DistrictScreenState extends State<DistrictScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddDistrictScreen(),
+                        builder: (context) => AddSubjectPage(),
                       ),
                     ).then((value) {
                       // This code will execute when PageB is popped.
                       // You can call setState() here to refresh PageA.
                       setState(() {
                         // For example, refetch data
-                        fetchDistricts();
+                        fetchSubjects();
                       });
                     }),
                   }, // Opens the book entry dialog
@@ -353,7 +339,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
                     children: [
                       Icon(Icons.add, color: Colors.white),
                       Text(
-                        'ເພີ່ມເມືອງໃຫມ່',
+                        'ເພີ່ມວິຊາຮຽນ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -388,7 +374,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
                       ],
                     ),
                   )
-                : filteredDistrict.isEmpty
+                : filteredSubject.isEmpty
                     ? Center(
                         child: Text(
                           "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
@@ -398,9 +384,9 @@ class _DistrictScreenState extends State<DistrictScreen> {
                         ),
                       )
                     : ListView.builder(
-                        itemCount: filteredDistrict.length,
+                        itemCount: filteredSubject.length,
                         itemBuilder: (context, index) {
-                          final district = filteredDistrict[index];
+                          final Subject = filteredSubject[index];
                           return Card(
                             margin: EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 16),
@@ -416,17 +402,18 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                   bool? result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => EditDistrictScreen(
-                                        dsid: district['dsid'],
-                                        dname: district['dname'],
-                                        pid: district['pid'],
+                                      builder: (context) => EditSubjectPage(
+                                        sub_id: Subject['sub_id'],
+                                        sub_Name: Subject['sub_Name'],
+                                        sYearID: Subject['SyearID'],
+                                        mid: Subject['mid'],
                                       ),
                                     ),
                                   );
                                   if (result == true) {
                                     // It would be refresh the informations in this Page
                                     setState(() {
-                                      fetchDistricts();
+                                      fetchSubjects();
                                     });
                                   }
                                 },
@@ -437,11 +424,8 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                     Column(
                                       // crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        SizedBox(
-                                          height: 10,
-                                        ),
                                         Text(
-                                          '${district['dname']}',
+                                          '${Subject['sub_Name']}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 20,
@@ -449,14 +433,31 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                           ),
                                         ),
                                         Text(
-                                          'ແຂວງ: ${district['pname']}',
+                                          '${Subject['Syear']}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 18,
                                             fontFamily: 'Phetsarath',
+                                            color: Subject['SyearID'] == 1
+                                                ? Colors
+                                                    .green // ถ้า ID เป็น 1 ให้เป็นสีเขียว
+                                                : Subject['SyearID'] == 2
+                                                    ? Colors
+                                                        .deepPurple // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
+                                                    : Subject['SyearID'] == 3
+                                                        ? Colors
+                                                            .orange // ถ้า ID เป็น 3 ให้เป็นสีแดง
+                                                        : Colors
+                                                            .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 10,
+                                        Text(
+                                          '${Subject['m_name']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            fontFamily: 'Phetsarath',
+                                          ),
                                         ),
                                       ],
                                     ),

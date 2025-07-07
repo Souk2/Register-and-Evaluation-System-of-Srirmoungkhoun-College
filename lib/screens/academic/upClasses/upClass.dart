@@ -35,7 +35,7 @@ class _UpClassState extends State<UpClass> {
   void fetchSearchStudents({String? searchQuery}) async {
     try {
       final fetchStudents = searchQuery == null || searchQuery.isEmpty
-          ? await Studentservice.getStudents()
+          ? await Studentservice.getStudentsAll()
           : await Studentservice.searchStudents(searchQuery);
       print(searchQuery);
       setState(() {
@@ -48,7 +48,7 @@ class _UpClassState extends State<UpClass> {
 
   void fetchStudents() async {
     try {
-      final fetchStudents = await Studentservice.getStudents();
+      final fetchStudents = await Studentservice.getStudentsAll();
       setState(() {
         students = fetchStudents;
       });
@@ -57,7 +57,9 @@ class _UpClassState extends State<UpClass> {
     }
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  // static const String baseUrl = "http://192.168.0.104:3000";
+
+  static const String baseUrl = "http://10.34.64.243:3000";
 
   Future<void> _fetchAllDropdownData() async {
     setState(() {
@@ -378,6 +380,7 @@ class _UpClassState extends State<UpClass> {
                       ),
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(20),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
                         items: statuSData.map((e) {
@@ -418,6 +421,7 @@ class _UpClassState extends State<UpClass> {
                       ),
                       child: DropdownButton(
                         padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(20),
                         underline: SizedBox.shrink(),
                         isExpanded: true,
                         items: studyyearData.map((e) {
@@ -474,7 +478,7 @@ class _UpClassState extends State<UpClass> {
                     : filteredStudents.isEmpty
                         ? Center(
                             child: Text(
-                              "!ບໍ່ພົບຊໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
+                              "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
                               style: TextStyle(
                                 fontFamily: 'Phetsarath',
                               ),
@@ -496,6 +500,28 @@ class _UpClassState extends State<UpClass> {
                                       Column(
                                         // crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          if (student['image_url'] != null)
+                                            Center(
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  student['image_url'],
+                                                  width: 120,
+                                                  height: 120,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      Icon(Icons.error),
+                                                ),
+                                              ),
+                                            ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
                                           Text(
                                             '${student['stdID']}',
                                             style: TextStyle(

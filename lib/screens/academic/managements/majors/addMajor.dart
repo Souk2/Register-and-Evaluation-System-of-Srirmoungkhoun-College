@@ -59,6 +59,12 @@ class _AddMajorState extends State<AddMajor> {
   }
 
   @override
+  void dispose() {
+    _tittlecontroller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +78,7 @@ class _AddMajorState extends State<AddMajor> {
             fontFamily: 'Phetsarath',
           ),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -83,6 +89,9 @@ class _AddMajorState extends State<AddMajor> {
             children: [
               TextFormField(
                 controller: _tittlecontroller,
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                ),
                 decoration: InputDecoration(
                   labelText: 'ຊື່ສາຂາຮຽນ',
                   labelStyle: TextStyle(
