@@ -75,7 +75,7 @@ class _NewStdPayState extends State<NewStdPay> {
 
   // static const String baseUrl = "http://192.168.0.104:3000";
 
-  static const String baseUrl = "http://10.34.64.243:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   final TextEditingController _stdID = TextEditingController();
   final TextEditingController _name = TextEditingController();

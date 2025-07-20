@@ -12,24 +12,34 @@ import 'package:registration_evaluation_app/services/EmployeesService.dart';
 import 'package:registration_evaluation_app/services/RegistrationService.dart';
 import 'package:registration_evaluation_app/services/StudentService.dart';
 
-class ChoSubTeacher extends StatefulWidget {
+class EditChoSubTeacher extends StatefulWidget {
+  final int teachSub_id;
   final String staff_id;
   final String staff_Name;
   final String staff_Surname;
+  final int classID;
+  final int sub_id;
+  final int SyearID;
   final String image_url;
-  const ChoSubTeacher({
+  final int mid;
+  const EditChoSubTeacher({
     super.key,
+    required this.teachSub_id,
     required this.staff_id,
     required this.staff_Name,
     required this.staff_Surname,
+    required this.classID,
+    required this.sub_id,
+    required this.SyearID,
     required this.image_url,
+    required this.mid,
   });
 
   @override
-  State<ChoSubTeacher> createState() => _ChoSubTeacherState();
+  State<EditChoSubTeacher> createState() => _EditChoSubTeacherState();
 }
 
-class _ChoSubTeacherState extends State<ChoSubTeacher> {
+class _EditChoSubTeacherState extends State<EditChoSubTeacher> {
   final _formKey = GlobalKey<FormState>();
 
   File? _selectedImage; //Upload Images
@@ -42,10 +52,14 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
   int? _valueSubject;
 
   List<dynamic> filteredSubjects = [];
+  List<dynamic> filteredSubjectsByMajor = [];
 
   //ຫ້ອງຮຽນ
   List<dynamic> classData = [];
   int? _valueClass;
+
+  List<dynamic> majorData = [];
+  int? _valueMajor;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -58,7 +72,8 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
     _empSurname.text = widget.staff_Surname;
 
     _imageUrl = widget.image_url;
-    _fetchAllDropdownData();
+    _fetchAllData();
+    _fetchDataAllDropDown();
   }
 
   final TextEditingController _empID = TextEditingController();
@@ -69,7 +84,7 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
 
   static const String baseUrl = "http://10.34.90.133:3000";
 
-  Future<void> _fetchAllDropdownData() async {
+  Future<void> _fetchAllData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -81,6 +96,7 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         http.get(Uri.parse("$baseUrl/subjects")),
         http.get(Uri.parse("$baseUrl/syear")),
         http.get(Uri.parse("$baseUrl/class")),
+        http.get(Uri.parse("$baseUrl/major")),
         // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
       ];
 
@@ -114,7 +130,14 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         throw Exception(
             'Failed to load districts data: ${responses[2].statusCode}');
       }
-
+      //ສະຖານະການຮຽນ
+      if (responses[3].statusCode == 200) {
+        majorData = jsonDecode(responses[3].body);
+        print('ສະຖານະການຮຽນ data loaded: ${majorData.length} items');
+      } else {
+        throw Exception(
+            'Failed to load provinces data: ${responses[3].statusCode}');
+      }
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
       setState(() {
         _isLoading = false;
@@ -128,9 +151,62 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
     }
   }
 
-  Future<void> _submitNewTeachSub() async {
+// ພາກສ່ວນໃນການດຶງຂໍ້ມູນ DropDown ຕ່າງໆ ຂຶິນມາສະແດງ
+  Future<void> _fetchDataAllDropDown() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final resSyear = await http.get(Uri.parse("$baseUrl/syear"));
+      final resSub = await http.get(Uri.parse("$baseUrl/subjects"));
+      final resClass = await http.get(Uri.parse("$baseUrl/class"));
+      final resMajor = await http.get(Uri.parse("$baseUrl/major"));
+      if (resSyear.statusCode == 200 &&
+          resSub.statusCode == 200 &&
+          resClass.statusCode == 200 &&
+          resMajor.statusCode == 200) {
+        final studyyear = jsonDecode(resSyear.body);
+        final subjects = jsonDecode(resSub.body);
+        final classes = jsonDecode(resClass.body);
+        final major = jsonDecode(resMajor.body);
+        setState(() {
+          _isLoading = false;
+
+          // ✅ Assign data lists
+          studyyearData = studyyear;
+          subjectData = subjects;
+          classData = classes;
+          majorData = major;
+          _valueSubject = widget.sub_id;
+          _valueSyear = widget.SyearID;
+          _valueClass = widget.classID;
+          _valueMajor = widget.mid;
+          // กรองวิชาตามสาขาที่เลือก
+          filteredSubjectsByMajor = subjectData.where((subj) {
+            return subj["mid"] == _valueMajor;
+          }).toList();
+          // กรองวิชาตามสาขาและปีเรียน
+          filteredSubjects = filteredSubjectsByMajor.where((subj) {
+            return subj["SyearID"] == _valueSyear;
+          }).toList();
+        });
+      } else {
+        throw Exception("One or more API failed");
+      }
+    } catch (error) {
+      // setState(() {
+      //   _isLoading = false;
+      //   _errorMessage = 'Error fetching data: $error';
+      // });
+      print("Error: $error");
+    }
+  }
+
+  Future<void> _submitUpdateTeachSub() async {
     if (_formKey.currentState!.validate()) {
-      if (_valueSubject == null || _valueClass == null) {
+      if (_valueMajor == null || _valueSubject == null || _valueClass == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -145,17 +221,19 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         return; // Stop submission if no province is selected
       }
 
-      bool success = await Employeesservice.addTeachSub(
+      bool success = await Employeesservice.updateTeachSub(
+        widget.teachSub_id,
         _empID.text,
         _valueClass!,
         _valueSubject!,
-        _valueSyear!, // 👈 รูปภาพที่ผู้ใช้เลือก
+        _valueSyear!,
+        _valueMajor!,
       );
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "ນັກຮຽນໃໝ່ຖືກບັນທຶກສຳເລັດແລ້ວ",
+              "ບັນທຶກສຳເລັດແລ້ວ",
               style: TextStyle(
                 fontFamily: 'Phetsarath',
               ),
@@ -259,11 +337,11 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                 ),
               ),
               onPressed: () {
-                if (_valueSubject == null) {
+                if (_valueMajor == null || _valueSubject == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        "ກະລຸນາເລືອກວິຊາກ່ອນ",
+                        "ກະລຸນາເລືອກສາຂາ ແລະ ວິຊາກ່ອນ",
                         style: TextStyle(
                           fontFamily: 'Phetsarath',
                         ),
@@ -274,8 +352,154 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                   Navigator.of(context).pop();
                   return; // Stop submission if no province is selected
                 } else {
-                  _submitNewTeachSub();
+                  _submitUpdateTeachSub();
                   Navigator.of(context).pop();
+                }
+              },
+              child: Text(
+                'ຕົກລົງ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _submitDeleteTeachSub() async {
+    if (_formKey.currentState!.validate()) {
+      if (_valueMajor == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ), // Please select a province
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return; // Stop submission if no province is selected
+      }
+
+      bool success = await Employeesservice.deleteTeachSub(
+        widget.teachSub_id,
+      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ລຶບຂໍ້ມູນສອນວິຊາສຳເລັດແລ້ວ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ////อยากให้มันย้อนกลับไปวิดเจ็ตก่อนหน้านี้
+        Navigator.of(context).pop(); // ปิด dialog
+        Navigator.of(context).pop(); // ย้อนกลับไปหน้าก่อนหน้านี้
+
+        showAlert();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "ຂໍອະໄພ!ເກີດຂໍ້ຜິດພາດ",
+              style: TextStyle(
+                fontFamily: 'Phetsarath',
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void ConfirmDelete() async {
+    print("ConfirmUpdate");
+    if (!mounted) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(
+            'ຢືນຍັນການລຶບ',
+            style: TextStyle(
+              fontFamily: 'Phetsarath',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'ທ່ານແນ່ໃຈວ່າຈະລຶບຫຼືບໍ່?',
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: 'Phetsarath',
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.orange,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(
+                'ຍົກເລີກ',
+                style: TextStyle(
+                  fontFamily: 'Phetsarath',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                minimumSize: Size(
+                  80,
+                  50,
+                ), // ປັບຂະໜາດ (ກວ້າງ x ສູງ)
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                if (_valueMajor == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "ກະລຸນາເລືອກຕົວເລືອກກ່ອນ",
+                        style: TextStyle(
+                          fontFamily: 'Phetsarath',
+                        ),
+                      ), // Please select a province
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                  return; // Stop submission if no province is selected
+                } else {
+                  _submitDeleteTeachSub();
                 }
               },
               child: Text(
@@ -309,7 +533,7 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         ),
         backgroundColor: Colors.blueAccent,
         title: Text(
-          "ຈັດການເລືອກວິຊາສອນ",
+          "ແກ້ໄຂເລືອກວິຊາສອນ",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -418,6 +642,66 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                 SizedBox(
                   height: 20,
                 ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  "ເລືອກສາຂາວິຊາສອນ",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontFamily: 'Phetsarath',
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 1), // Border
+                  ),
+                  child: DropdownButton(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    underline: SizedBox.shrink(),
+                    borderRadius: BorderRadius.circular(20),
+                    isExpanded: true,
+                    items: majorData.map((e) {
+                      return DropdownMenuItem(
+                        child: Text(
+                          e["m_name"],
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                        value: e["mid"],
+                      );
+                    }).toList(),
+                    value: _valueMajor,
+                    onChanged: (v) {
+                      setState(() {
+                        _valueMajor = v as int;
+                        // กรองวิชาตามสาขาที่เลือก
+                        filteredSubjectsByMajor = subjectData.where((subj) {
+                          return subj["mid"] == _valueMajor;
+                        }).toList();
+                        // รีเซ็ตค่าปีเรียนและวิชาเรียน
+                        _valueSyear = null;
+                        _valueSubject = null;
+                        filteredSubjects = [];
+                      });
+                    },
+                    hint: Text(
+                      "ເລືອກສາຂາ",
+                      style: TextStyle(
+                        fontFamily: 'Phetsarath',
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
                 Text(
                   "ເລືອກປີສອນ ແລະ ວິຊາສອນ",
                   style: TextStyle(
@@ -459,7 +743,9 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                             setState(() {
                               _valueSyear = v as int;
 
-                              filteredSubjects = subjectData.where((subj) {
+                              // กรองวิชาตามสาขาและปีเรียน
+                              filteredSubjects =
+                                  filteredSubjectsByMajor.where((subj) {
                                 return subj["SyearID"] == _valueSyear;
                               }).toList();
 
@@ -568,6 +854,42 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                 ),
                 Row(
                   children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
+                        ),
+                        onPressed: () {
+                          ConfirmDelete();
+                          print("ລຶບການຂໍ້ມູນສອນວິຊາສຳເລັດ");
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              'ລຶບ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Phetsarath',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30,
+                    ),
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(

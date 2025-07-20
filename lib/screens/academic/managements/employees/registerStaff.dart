@@ -52,14 +52,14 @@ class _RegisterStaffState extends State<RegisterStaff> {
 
   // static const String baseUrl = "http://192.168.0.104:3000";
 
-  static const String baseUrl = "http://10.34.64.243:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   Future<void> _fetchAllDropdownData() async {
+    if (!mounted) return; // Add this check
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-
     try {
       // 1. สร้าง List ของ Future สำหรับแต่ละ API call
       List<Future<http.Response>> futures = [
@@ -98,10 +98,12 @@ class _RegisterStaffState extends State<RegisterStaff> {
       }
 
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
+      if (!mounted) return; // Add this check before setState
       setState(() {
         _isLoading = false;
       });
     } catch (error) {
+      if (!mounted) return; // Add this check before setState
       setState(() {
         _isLoading = false;
         _errorMessage = 'An unexpected error occurred: $error';

@@ -44,7 +44,7 @@ class _EditSubjectPageState extends State<EditSubjectPage> {
     _titleController.text = widget.sub_Name;
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
   // ພາກສ່ວນໃນການດຶງຂໍ້ມູນ DropDown ຕ່າງໆ ຂຶິນມາສະແດງ
   Future<void> _fetchDataAll() async {
     setState(() {

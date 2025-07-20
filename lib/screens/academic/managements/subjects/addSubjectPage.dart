@@ -32,7 +32,7 @@ class _AddSubjectPageState extends State<AddSubjectPage> {
     _fetchAllDropdownData(); // Call the data fetching function when the widget is created
   }
 
-  static const String baseUrl = "http://192.168.0.104:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   Future<void> _fetchAllDropdownData() async {
     setState(() {

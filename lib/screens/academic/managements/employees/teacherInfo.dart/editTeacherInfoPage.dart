@@ -253,7 +253,8 @@ class _EditTeacherInfoPageState extends State<EditTeacherInfoPage> {
     // ถ้าเลือกรูปใหม่แล้ว อัปโหลดรูปใหม่
     if (_selectedImage != null) {
       final uri = Uri.parse(
-          'http://192.168.0.104:3000/uploadImg/update/staff/${widget.staff_id}');
+          // 'http://192.168.0.104:3000/uploadImg/update/staff/${widget.staff_id}');
+          'http://10.34.90.133:3000/uploadImg/update/staff/${widget.staff_id}');
       final request = http.MultipartRequest('PUT', uri);
 
       request.files.add(

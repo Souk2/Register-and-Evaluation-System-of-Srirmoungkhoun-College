@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/employees/teacherInfo.dart/choSubT.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/choSubT.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/employees/teacherInfo.dart/editTeacherInfoPage.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/editchoSubT.dart';
 import 'package:registration_evaluation_app/screens/academic/payments/editPaymentPage.dart';
 import 'package:registration_evaluation_app/services/EmployeesService.dart';
 import 'package:registration_evaluation_app/services/StudentService.dart';
-
-// สร้าง enum เพื่อใช้เป็นค่าใน Radio buttons
-enum TeacherType { editTeacher, choSubTeacher, editSubTeach }
 
 class TeacherInfoPage extends StatefulWidget {
   const TeacherInfoPage({super.key});
@@ -84,133 +82,6 @@ class _TeacherInfoPageState extends State<TeacherInfoPage> {
       ),
       confirmBtnColor: Colors.green,
       confirmBtnText: "ຕົກລົງ",
-    );
-  }
-
-  TeacherType? _selectedTeacherType;
-  // รายการข้อความสำหรับ Radio buttons
-  final List<String> opt = [
-    "ແກ້ໄຂຄູ-ອາຈານ",
-    "ເລືອກວິຊາສອນໃຫ້ອາຈານ",
-    "ແກ້ໄຂວິຊາສອນ"
-  ];
-
-  Future<void> _showTeacherSelectionDialog(Map<String, dynamic> teacher) async {
-    setState(() {
-      _selectedTeacherType = null;
-    });
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text(
-            "ເຂົ້າສູ່ໜ້າ...",
-            style: TextStyle(
-                fontFamily: 'Phetsarath', fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              RadioListTile<TeacherType>(
-                title: Text(opt[0], style: TextStyle(fontFamily: 'Phetsarath')),
-                value: TeacherType.editTeacher,
-                groupValue: _selectedTeacherType,
-                onChanged: (TeacherType? value) async {
-                  setState(() {
-                    _selectedTeacherType = value;
-                  });
-                  Navigator.of(dialogContext).pop();
-
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditTeacherInfoPage(
-                        staff_id: teacher['staff_id'],
-                        image_url: teacher['image_url'],
-                        staff_Name: teacher['staff_Name'],
-                        staff_Surname: teacher['staff_Surname'],
-                        dob: teacher['dob'],
-                        currentOpt: teacher['gender'],
-                        village: teacher['village'],
-                        dsid: teacher['dsid'],
-                        phoneNum: teacher['phoneNum'],
-                        email: teacher['email'],
-                        roleID: teacher['roleID'],
-                      ),
-                    ),
-                  );
-
-                  // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
-                  if (result == true) {
-                    setState(() {
-                      fetchTeachers();
-                    });
-                  }
-                },
-              ),
-              RadioListTile<TeacherType>(
-                title: Text(opt[1], style: TextStyle(fontFamily: 'Phetsarath')),
-                value: TeacherType.choSubTeacher,
-                groupValue: _selectedTeacherType,
-                onChanged: (TeacherType? value) async {
-                  setState(() {
-                    _selectedTeacherType = value;
-                  });
-                  Navigator.of(dialogContext).pop();
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChoSubTeacher(
-                        staff_id: teacher['staff_id'],
-                        image_url: teacher['image_url'],
-                        staff_Name: teacher['staff_Name'],
-                        staff_Surname: teacher['staff_Surname'],
-                      ),
-                    ),
-                  );
-
-                  // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
-                  if (result == true) {
-                    setState(() {
-                      fetchTeachers();
-                    });
-                  }
-                },
-              ),
-              RadioListTile<TeacherType>(
-                title: Text(opt[2], style: TextStyle(fontFamily: 'Phetsarath')),
-                value: TeacherType.choSubTeacher,
-                groupValue: _selectedTeacherType,
-                onChanged: (TeacherType? value) async {
-                  setState(() {
-                    _selectedTeacherType = value;
-                  });
-                  Navigator.of(dialogContext).pop();
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChoSubTeacher(
-                        staff_id: teacher['staff_id'],
-                        image_url: teacher['image_url'],
-                        staff_Name: teacher['staff_Name'],
-                        staff_Surname: teacher['staff_Surname'],
-                      ),
-                    ),
-                  );
-
-                  // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
-                  if (result == true) {
-                    setState(() {
-                      fetchTeachers();
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -345,7 +216,7 @@ class _TeacherInfoPageState extends State<TeacherInfoPage> {
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'ເຂົ້າສູ່ໜ້າການເລືອກວິຊາສອນ',
+                                            'ເຂົ້າສູ່ໜ້າແກ້ໄຂຂໍ້ມູນ',
                                             style: TextStyle(
                                               fontFamily: 'Phetsarath',
                                             ),
@@ -354,7 +225,33 @@ class _TeacherInfoPageState extends State<TeacherInfoPage> {
                                           duration: Duration(seconds: 2),
                                         ),
                                       );
-                                      _showTeacherSelectionDialog(teacher);
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditTeacherInfoPage(
+                                            staff_id: teacher['staff_id'],
+                                            image_url: teacher['image_url'],
+                                            staff_Name: teacher['staff_Name'],
+                                            staff_Surname:
+                                                teacher['staff_Surname'],
+                                            dob: teacher['dob'],
+                                            currentOpt: teacher['gender'],
+                                            village: teacher['village'],
+                                            dsid: teacher['dsid'],
+                                            phoneNum: teacher['phoneNum'],
+                                            email: teacher['email'],
+                                            roleID: teacher['roleID'],
+                                          ),
+                                        ),
+                                      );
+
+                                      // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
+                                      if (result == true) {
+                                        setState(() {
+                                          fetchTeachers();
+                                        });
+                                      }
                                     },
                                     child: Row(
                                       //mainAxisAlignment: MainAxisAlignment.spaceBetween,

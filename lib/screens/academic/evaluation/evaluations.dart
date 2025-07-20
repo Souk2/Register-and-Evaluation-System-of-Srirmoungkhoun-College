@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/classroom/classrooms.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/subjects/subjectPage.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/students/studentPage.dart';
 
 class Evaluations extends StatefulWidget {
   const Evaluations({super.key});
@@ -75,10 +72,10 @@ class _EvaluationsState extends State<Evaluations> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) => StudentPage()));
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (_) => ()));
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,
@@ -124,10 +121,10 @@ class _EvaluationsState extends State<Evaluations> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () => {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) => Classrooms())),
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (_) => ())),
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,
@@ -173,13 +170,13 @@ class _EvaluationsState extends State<Evaluations> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () => {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const SubjectPage(),
-                                          ),
-                                        )
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //         const (),
+                                        //   ),
+                                        // )
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,

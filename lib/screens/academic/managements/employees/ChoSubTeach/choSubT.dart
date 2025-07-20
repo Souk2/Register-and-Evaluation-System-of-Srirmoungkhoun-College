@@ -42,6 +42,10 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
   int? _valueSubject;
 
   List<dynamic> filteredSubjects = [];
+  List<dynamic> filteredSubjectsByMajor = [];
+
+  List<dynamic> majorData = [];
+  int? _valueMajor;
 
   //ຫ້ອງຮຽນ
   List<dynamic> classData = [];
@@ -81,6 +85,7 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         http.get(Uri.parse("$baseUrl/subjects")),
         http.get(Uri.parse("$baseUrl/syear")),
         http.get(Uri.parse("$baseUrl/class")),
+        http.get(Uri.parse("$baseUrl/major")),
         // เพิ่ม API ตัวอื่นๆ ได้ตามต้องการ
       ];
 
@@ -114,7 +119,14 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         throw Exception(
             'Failed to load districts data: ${responses[2].statusCode}');
       }
-
+      //ສະຖານະການຮຽນ
+      if (responses[3].statusCode == 200) {
+        majorData = jsonDecode(responses[3].body);
+        print('ສະຖານະການຮຽນ data loaded: ${majorData.length} items');
+      } else {
+        throw Exception(
+            'Failed to load provinces data: ${responses[3].statusCode}');
+      }
       // 4. อัปเดต UI หลังจากข้อมูลทั้งหมดโหลดเสร็จสมบูรณ์
       setState(() {
         _isLoading = false;
@@ -130,7 +142,7 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
 
   Future<void> _submitNewTeachSub() async {
     if (_formKey.currentState!.validate()) {
-      if (_valueSubject == null || _valueClass == null) {
+      if (_valueMajor == null || _valueSubject == null || _valueClass == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -149,7 +161,8 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
         _empID.text,
         _valueClass!,
         _valueSubject!,
-        _valueSyear!, // 👈 รูปภาพที่ผู้ใช้เลือก
+        _valueSyear!,
+        _valueMajor!,
       );
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -259,11 +272,11 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                 ),
               ),
               onPressed: () {
-                if (_valueSubject == null) {
+                if (_valueMajor == null || _valueSubject == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        "ກະລຸນາເລືອກວິຊາກ່ອນ",
+                        "ກະລຸນາເລືອກສາຂາ ແລະ ວິຊາກ່ອນ",
                         style: TextStyle(
                           fontFamily: 'Phetsarath',
                         ),
@@ -419,6 +432,63 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                   height: 20,
                 ),
                 Text(
+                  "ເລືອກສາຂາວິຊາສອນ",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontFamily: 'Phetsarath',
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 1), // Border
+                  ),
+                  child: DropdownButton(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    underline: SizedBox.shrink(),
+                    borderRadius: BorderRadius.circular(20),
+                    isExpanded: true,
+                    items: majorData.map((e) {
+                      return DropdownMenuItem(
+                        child: Text(
+                          e["m_name"],
+                          style: TextStyle(
+                            fontFamily: 'Phetsarath',
+                          ),
+                        ),
+                        value: e["mid"],
+                      );
+                    }).toList(),
+                    value: _valueMajor,
+                    onChanged: (v) {
+                      setState(() {
+                        _valueMajor = v as int;
+                        // กรองวิชาตามสาขาที่เลือก
+                        filteredSubjectsByMajor = subjectData.where((subj) {
+                          return subj["mid"] == _valueMajor;
+                        }).toList();
+                        // รีเซ็ตค่าปีเรียนและวิชาเรียน
+                        _valueSyear = null;
+                        _valueSubject = null;
+                        filteredSubjects = [];
+                      });
+                    },
+                    hint: Text(
+                      "ເລືອກສາຂາ",
+                      style: TextStyle(
+                        fontFamily: 'Phetsarath',
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Text(
                   "ເລືອກປີສອນ ແລະ ວິຊາສອນ",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -459,7 +529,9 @@ class _ChoSubTeacherState extends State<ChoSubTeacher> {
                             setState(() {
                               _valueSyear = v as int;
 
-                              filteredSubjects = subjectData.where((subj) {
+                              // กรองวิชาตามสาขาและปีเรียน
+                              filteredSubjects =
+                                  filteredSubjectsByMajor.where((subj) {
                                 return subj["SyearID"] == _valueSyear;
                               }).toList();
 

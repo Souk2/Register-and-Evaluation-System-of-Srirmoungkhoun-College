@@ -121,7 +121,7 @@ class _EditOldStudentReState extends State<EditOldStudentRe> {
 
   // static const String baseUrl = "http://192.168.0.104:3000";
 
-  static const String baseUrl = "http://10.34.64.243:3000";
+  static const String baseUrl = "http://10.34.90.133:3000";
 
   // ພາກສ່ວນໃນການດຶງຂໍ້ມູນ DropDown ຕ່າງໆ ຂຶິນມາສະແດງ
   Future<void> _fetchData() async {

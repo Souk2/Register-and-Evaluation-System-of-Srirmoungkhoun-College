@@ -3,26 +3,29 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
-import 'package:registration_evaluation_app/screens/academic/managements/employees/financeInfo.dart/editFinanceInfoPage.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/choSubT.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/teacherInfo.dart/editTeacherInfoPage.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/editchoSubT.dart';
 import 'package:registration_evaluation_app/screens/academic/payments/editPaymentPage.dart';
 import 'package:registration_evaluation_app/services/EmployeesService.dart';
 import 'package:registration_evaluation_app/services/StudentService.dart';
 
-class FinanceInfoPage extends StatefulWidget {
-  const FinanceInfoPage({super.key});
+// สร้าง enum เพื่อใช้เป็นค่าใน Radio buttons
+enum TeacherType { choSubTeacher, editSubTeach }
+
+class ChoSubTPage extends StatefulWidget {
+  const ChoSubTPage({super.key});
 
   @override
-  State<FinanceInfoPage> createState() => _FinanceInfoPageState();
+  State<ChoSubTPage> createState() => _ChoSubTPageState();
 }
 
-class _FinanceInfoPageState extends State<FinanceInfoPage> {
-  static const String baseUrl = "http://192.168.0.104:3000";
+class _ChoSubTPageState extends State<ChoSubTPage> {
+  // static const String baseUrl = "http://192.168.0.104:3000";
 
-  List<dynamic> finances = [];
+  List<dynamic> teachers = [];
 
   TextEditingController _searchController = TextEditingController();
-
-  // bool _isLoadings = true; //ເພື່ອເຮັດໜ້າ spinner ໂລດ
 
   bool _isLoading = false;
 
@@ -32,37 +35,37 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
   void initState() {
     super.initState();
     // _fetchAllDropdownData(); // Call the data fetching function when the widget is created
-    fetchFinances();
+    fetchTeachers();
   }
 
-  void fetchSearchFinances({String? searchQuery}) async {
+  void fetchSearchTeachers({String? searchQuery}) async {
     try {
-      final fetchFinances = searchQuery == null || searchQuery.isEmpty
-          ? await Employeesservice.getEmployees()
+      final fetchTeachers = searchQuery == null || searchQuery.isEmpty
+          ? await Employeesservice.getChoTesch()
           : await Employeesservice.searchEmployees(searchQuery);
       print(searchQuery);
       setState(() {
-        finances = fetchFinances;
+        teachers = fetchTeachers;
       });
     } catch (e) {
       print("Error:$e");
     }
   }
 
-  void fetchFinances() async {
+  void fetchTeachers() async {
     try {
-      final fetchfinances = await Employeesservice.getEmployees();
+      final fetchTeachers = await Employeesservice.getChoTesch();
       setState(() {
-        finances = fetchfinances;
+        teachers = fetchTeachers;
       });
     } catch (e) {
       print("Error: $e");
     }
   }
 
-  List<dynamic> get filteredFinances {
-    return finances.where((teacher) {
-      final matchesTeacher = teacher['roleID'] == 4;
+  List<dynamic> get filteredTeachers {
+    return teachers.where((teacher) {
+      final matchesTeacher = teacher['roleID'] == 3;
       return matchesTeacher;
     }).toList();
   }
@@ -83,6 +86,97 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
     );
   }
 
+  TeacherType? _selectedTeacherType;
+  // รายการข้อความสำหรับ Radio buttons
+  final List<String> opt = ["ເລືອກວິຊາສອນໃຫ້ອາຈານ", "ແກ້ໄຂວິຊາສອນ"];
+
+  Future<void> _showTeacherSelectionDialog(Map<String, dynamic> teacher) async {
+    setState(() {
+      _selectedTeacherType = null;
+    });
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            "ເຂົ້າສູ່ໜ້າ...",
+            style: TextStyle(
+                fontFamily: 'Phetsarath', fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              RadioListTile<TeacherType>(
+                title: Text(opt[0], style: TextStyle(fontFamily: 'Phetsarath')),
+                value: TeacherType.choSubTeacher,
+                groupValue: _selectedTeacherType,
+                onChanged: (TeacherType? value) async {
+                  setState(() {
+                    _selectedTeacherType = value;
+                  });
+                  Navigator.of(dialogContext).pop();
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChoSubTeacher(
+                        staff_id: teacher['staff_id'],
+                        image_url: teacher['image_url'],
+                        staff_Name: teacher['staff_Name'],
+                        staff_Surname: teacher['staff_Surname'],
+                      ),
+                    ),
+                  );
+
+                  // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
+                  if (result == true) {
+                    setState(() {
+                      fetchTeachers();
+                    });
+                  }
+                },
+              ),
+              RadioListTile<TeacherType>(
+                title: Text(opt[1], style: TextStyle(fontFamily: 'Phetsarath')),
+                value: TeacherType.choSubTeacher,
+                groupValue: _selectedTeacherType,
+                onChanged: (TeacherType? value) async {
+                  setState(() {
+                    _selectedTeacherType = value;
+                  });
+                  Navigator.of(dialogContext).pop();
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditChoSubTeacher(
+                        teachSub_id: teacher['teachSub_id'],
+                        staff_id: teacher['staff_id'],
+                        image_url: teacher['image_url'],
+                        staff_Name: teacher['staff_Name'],
+                        staff_Surname: teacher['staff_Surname'],
+                        classID: teacher['classID'],
+                        sub_id: teacher['sub_id'],
+                        SyearID: teacher['SyearID'],
+                        mid: teacher['mid'],
+                      ),
+                    ),
+                  );
+
+                  // ถ้าหน้าแก้ไขส่ง true กลับมา ให้ refresh
+                  if (result == true) {
+                    setState(() {
+                      fetchTeachers();
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -98,7 +192,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
         ),
         backgroundColor: Colors.blueAccent,
         title: Text(
-          "ຈັດການນັການເງິນ",
+          "ຈັດການເລືອກວິຊາສອນ",
           style: TextStyle(
             fontFamily: 'Phetsarath',
             color: Colors.white,
@@ -117,8 +211,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(
-                  pageBuilder: (a, b, c) =>
-                      FinanceInfoPage(), // โหลดหน้าใหม่ทับ
+                  pageBuilder: (a, b, c) => ChoSubTPage(), // โหลดหน้าใหม่ทับ
                   transitionDuration: Duration.zero,
                 ),
               );
@@ -151,7 +244,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                     Icons.search,
                   ),
                   onPressed: () {
-                    fetchSearchFinances(searchQuery: _searchController.text);
+                    fetchSearchTeachers(searchQuery: _searchController.text);
                   },
                 ),
               ),
@@ -184,7 +277,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                           ],
                         ),
                       )
-                    : finances.isEmpty
+                    : teachers.isEmpty
                         ? Center(
                             child: Text(
                               "!ບໍ່ພົບຂໍ້ມູນ ຫຼື ຂາດການເຊື່ອມຕໍ່!",
@@ -194,9 +287,9 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: filteredFinances.length,
+                            itemCount: filteredTeachers.length,
                             itemBuilder: (context, index) {
-                              final teacher = filteredFinances[index];
+                              final teacher = filteredTeachers[index];
                               return Card(
                                 margin: EdgeInsets.symmetric(
                                     vertical: 8, horizontal: 16),
@@ -214,7 +307,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'ເຂົ້າສູ່ໜ້າແກ້ໄຂຂໍ້ມູນ',
+                                            'ເຂົ້າສູ່ໜ້າການເລືອກວິຊາສອນ',
                                             style: TextStyle(
                                               fontFamily: 'Phetsarath',
                                             ),
@@ -223,32 +316,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                                           duration: Duration(seconds: 2),
                                         ),
                                       );
-                                      bool? result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditFinanceInfoPage(
-                                            staff_id: teacher['staff_id'],
-                                            image_url: teacher['image_url'],
-                                            staff_Name: teacher['staff_Name'],
-                                            staff_Surname:
-                                                teacher['staff_Surname'],
-                                            dob: teacher['dob'],
-                                            currentOpt: teacher['gender'],
-                                            village: teacher['village'],
-                                            dsid: teacher['dsid'],
-                                            phoneNum: teacher['phoneNum'],
-                                            email: teacher['email'],
-                                            roleID: teacher['roleID'],
-                                          ),
-                                        ),
-                                      );
-                                      if (result == true) {
-                                        // If PageB signals a refresh
-                                        setState(() {
-                                          fetchFinances(); // Refresh PageA
-                                        });
-                                      }
+                                      _showTeacherSelectionDialog(teacher);
                                     },
                                     child: Row(
                                       //mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -324,7 +392,7 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                                               ],
                                             ),
                                             Text(
-                                              '${teacher['rolename']}',
+                                              '${teacher['Syear']}',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: MediaQuery.of(context)
@@ -332,20 +400,32 @@ class _FinanceInfoPageState extends State<FinanceInfoPage> {
                                                         .width *
                                                     0.048,
                                                 fontFamily: 'Phetsarath',
-                                                color: teacher['roleID'] == 1
+                                                color: teacher['SyearID'] == 1
                                                     ? Colors
                                                         .blue // ถ้า ID เป็น 1 ให้เป็นสีเขียว
-                                                    : teacher['roleID'] == 2
+                                                    : teacher['SyearID'] == 2
                                                         ? Colors
                                                             .green // ถ้า ID เป็น 2 ให้เป็นสีเหลือง
-                                                        : teacher['roleID'] == 3
+                                                        : teacher['SyearID'] ==
+                                                                3
                                                             ? Colors
                                                                 .purple // ถ้า ID เป็น 3 ให้เป็นสีแดง
-                                                            : teacher['roleID'] ==
+                                                            : teacher['SyearID'] ==
                                                                     4
                                                                 ? Colors.amber
                                                                 : Colors
                                                                     .black, // กรณีอื่น ๆ (เช่นไม่มีค่าตรงกับเงื่อนไข) ให้เป็นสีดำ
+                                              ),
+                                            ),
+                                            Text(
+                                              ' ${teacher['sub_Name']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.048,
+                                                fontFamily: 'Phetsarath',
                                               ),
                                             ),
                                           ],

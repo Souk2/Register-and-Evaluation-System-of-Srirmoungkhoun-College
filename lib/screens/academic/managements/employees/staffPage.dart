@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/districts/DistrictScreen.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/choSubTPage.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/employees/financeInfo.dart/financeInfoPage.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/employees/registerStaff.dart';
+import 'package:registration_evaluation_app/screens/academic/managements/employees/ChoSubTeach/choSubT.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/employees/teacherInfo.dart/teacherInfoPage.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/provinces/ProvinceScreen.dart';
 import 'package:registration_evaluation_app/screens/academic/managements/classroom/classrooms.dart';
@@ -188,6 +190,65 @@ class _StaffPageState extends State<StaffPage> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
+                                                const ChoSubTPage(),
+                                          ),
+                                        )
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            MediaQuery.of(context).size.width *
+                                                0.3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.edit_note_rounded,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.14,
+                                        color: Colors.blueAccent,
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'ຈັດການ\nເລືອກວິຊາສອນ',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Color(0xFF345FB4),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        fontFamily: 'Phetsarath',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
                                                 const FinanceInfoPage(),
                                           ),
                                         )
@@ -235,7 +296,6 @@ class _StaffPageState extends State<StaffPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 15),
                           ],
                         ),
                       ],
